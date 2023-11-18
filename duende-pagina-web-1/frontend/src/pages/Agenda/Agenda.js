@@ -66,19 +66,50 @@ export default class Scheduler extends Component {
 			selectedEventType: event.target.value,
 		});
 	};
-	handlePopupOpen = (args: PopupOpenEventArgs) => {
-		if (args.type === 'Editor') {
-			const eventTypeElement = args.element.querySelector('#EventType');
-			if (eventTypeElement) {
-				eventTypeElement.value = this.state.selectedEventType;
-			}
-		}
-	};
+	handlePopupOpen = (args: PopupOpenEventArgs) => { 
+        if (args.type === 'Editor' && !this.state.isEventTypeFieldAdded) { 
+            const formElements = args.element.querySelector('.e-schedule-form'); 
+            if (formElements) { 
+				console.log("Form elements ", formElements);
+                const eventTypeElement = document.createElement('select'); 
+                eventTypeElement.id = 'EventType'; 
+                eventTypeElement.name = 'EventType'; 
+ 
+                const option1 = document.createElement('option'); 
+                option1.value = 'Tipo1'; 
+                option1.text = 'Tipo1'; 
+                eventTypeElement.appendChild(option1); 
+ 
+                const option2 = document.createElement('option'); 
+                option2.value = 'Tipo2'; 
+                option2.text = 'Tipo2'; 
+                eventTypeElement.appendChild(option2); 
+ 
+                eventTypeElement.value = this.state.selectedEventType; 
+ 
+                formElements.appendChild(eventTypeElement); 
+ 
+                this.setState((prevState) => ({ 
+                    isEventTypeFieldAdded: !prevState.isEventTypeFieldAdded, 
+                })); 
+            } 
+        } 
+    }; 
 	handleFieldValidation = (args: FieldValidationEventArgs) => {
 		if (args.field === 'Subject' && args.value === '') {
 			args.errorClass.push('e-schedule-error');
 			args.errorMessage.push('Subject is required');
 		}
+	};
+	handleEventSave = (args) => {
+		// Agregar o actualizar el campo Type al evento antes de guardarlo
+		args.data.Type = this.state.selectedEventType;
+	
+		// Lógica de guardado del evento, puedes ajustar según tus necesidades
+		console.log('Evento guardado:', args.data);
+	
+		// Actualizar el estado para forzar una re-renderización del componente
+		this.forceUpdate();
 	};
 	render() {
 		return (
@@ -92,19 +123,13 @@ export default class Scheduler extends Component {
 				pathTienda='MainPageEcomerceAdmin'
 				mostrarCarrito={false}
 			/>
-			<div>
-					<label>Tipo de Evento:</label>
-					<select onChange={this.handleEventTypeChange} value={this.state.selectedEventType}>
-						<option value="Tipo1">Tipo 1</option>
-						<option value="Tipo2">Tipo 2</option>
-						{/* Agrega más opciones según tus necesidades */}
-					</select>
-				</div>
+		
 			<ScheduleComponent
 				currentView='Month'
 				selectedDate={new Date(2019, 0, 11)}
 				eventSettings={ this.localData}
 				eventRendered={(args) => {
+					//console.log(args.data);
 					if (args.data.Type === 'Tipo2') {
 						args.element.style.backgroundColor = 'red';
 						args.element.style.color = 'white';
