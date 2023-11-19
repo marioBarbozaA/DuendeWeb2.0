@@ -10,136 +10,156 @@ import {
 	WorkWeek,
 	Month,
 	Agenda,
-	EventSettingsModel,
-	PopupOpenEventArgs,
-	FieldValidationEventArgs,
+	ViewsDirective,
+	ViewDirective,
+	DragAndDrop,
+	Resize,
+	Schedule,
 } from '@syncfusion/ej2-react-schedule';
-
+import { DropDownListComponent } from '@syncfusion/ej2-react-dropdowns';
+import { DateTimePickerComponent } from '@syncfusion/ej2-react-calendars';
 import { registerLicense } from '@syncfusion/ej2-base';
-
-import { DataManager,WebApiAdaptor } from '@syncfusion/ej2-data' ;
+import { L10n } from '@syncfusion/ej2-base';
 
 registerLicense(
 	'Ngo9BigBOggjHTQxAR8/V1NHaF5cWWdCf1FpRGRGfV5yd0VHYlZQRHxeSk0SNHVRdkdgWH5fd3RVR2FYVkx2Vko=',
 );
-
-//We have received your application and created a ticket with the reference number #523297. We will validate your request within the next 48
+let localData = [
+	{
+		Id: 1,
+		Subject: 'plug de tierrosa',
+		EventType: 'Entrega',
+		StartTime: new Date(2023, 10, 17, 6, 0),
+		EndTime: new Date(2023, 10, 17, 7, 0),
+		Location: 'Chepe Centro',
+	},
+	{
+		Id: 2,
+		Subject: 'Maquillaje de Tierrosa',
+		EventType: 'Cita',
+		StartTime: new Date(2023, 10, 16, 6, 0),
+		EndTime: new Date(2023, 10, 16, 7, 0),
+		Location: 'Chepe Centro',
+	},
+];
+L10n.load({
+	'en-US': {
+		schedule: {
+			saveButton: 'Guardar',
+			cancelButton: 'Cerrar',
+			deleteButton: 'Eliminar',
+			newEvent: 'Añadir Evento',
+		},
+	},
+});
 export default class Scheduler extends Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			selectedEventType: 'Tipo1', // Valor predeterminado
-		};
-	}
-	 localData: EventSettingsModel = {
-		dataSource: [
-			{
-				End: new Date(2019, 0, 11, 6, 30),
-				Start: new Date(2019, 0, 11, 4, 0),
-				Summary: '',
-				IsAllDay: true,
-				RecurrenceRule: 'FREQ=DAILY;INTERVAL=1;COUNT=5',
-				isReadonly: true,
-				Type:'Tipo1'
-			},
-			{
-				Id:2,
-				End: new Date(2019, 0, 21, 8,30),
-				Start: new Date(2019, 0, 21, 7, 0),
-				Summary:'Entrega',
-				isReadonly: true,
-				Type:'Tipo2'
+	onDragStart = args => {
+		//args.scroll = { enabled: false };
+		args.interval = 10;
+	};
 
-			}
-		],
-		fields: {
-			subject: { name: 'Summary', default: 'No title' },
-			startTime: { name:'Start'},
-			endTime: { name:'End'},
-			id: 'Id',
-			type: 'Type', // Agregar el tipo de evento
-		}
+	onResizeStart = args => {
+		//args.scroll = { enabled: false };
+		args.interval = 10;
 	};
-	
-	handleEventTypeChange = (event) => {
-		this.setState({
-			selectedEventType: event.target.value,
-		});
-	};
-	handlePopupOpen = (args: PopupOpenEventArgs) => { 
-        if (args.type === 'Editor' && !this.state.isEventTypeFieldAdded) { 
-            const formElements = args.element.querySelector('.e-schedule-form'); 
-            if (formElements) { 
-				console.log("Form elements ", formElements);
-                const eventTypeElement = document.createElement('select'); 
-                eventTypeElement.id = 'EventType'; 
-                eventTypeElement.name = 'EventType'; 
- 
-                const option1 = document.createElement('option'); 
-                option1.value = 'Tipo1'; 
-                option1.text = 'Tipo1'; 
-                eventTypeElement.appendChild(option1); 
- 
-                const option2 = document.createElement('option'); 
-                option2.value = 'Tipo2'; 
-                option2.text = 'Tipo2'; 
-                eventTypeElement.appendChild(option2); 
- 
-                eventTypeElement.value = this.state.selectedEventType; 
- 
-                formElements.appendChild(eventTypeElement); 
- 
-                this.setState((prevState) => ({ 
-                    isEventTypeFieldAdded: !prevState.isEventTypeFieldAdded, 
-                })); 
-            } 
-        } 
-    }; 
-	handleFieldValidation = (args: FieldValidationEventArgs) => {
-		if (args.field === 'Subject' && args.value === '') {
-			args.errorClass.push('e-schedule-error');
-			args.errorMessage.push('Subject is required');
-		}
-	};
-	handleEventSave = (args) => {
-		// Agregar o actualizar el campo Type al evento antes de guardarlo
-		args.data.Type = this.state.selectedEventType;
-	
-		// Lógica de guardado del evento, puedes ajustar según tus necesidades
-		console.log('Evento guardado:', args.data);
-	
-		// Actualizar el estado para forzar una re-renderización del componente
-		this.forceUpdate();
-	};
+
+	editorWindowTemplate(props) {
+		return (
+			<table className='custom-event-editor'>
+				<tbody>
+					<tr>
+						<td className='e-textlabel'>Evento</td>
+						<td>
+							<input
+								id='Summary'
+								name='Subject'
+								type='text'
+								className='e-field e-input'
+							/>
+						</td>
+					</tr>
+					<tr>
+						<td className='e-textlabel'>Tipo</td>
+						<td>
+							<DropDownListComponent
+								id='EventType'
+								dataSource={['Entrega', 'Cita', 'Otro']}
+								placeholder='Escoge el tipo'
+								data-name='EventType'
+								value={props.EventType || null}
+								className='e-field'
+							></DropDownListComponent>
+						</td>
+					</tr>
+					<tr>
+						<td className='e-textlabel'>De</td>
+						<td>
+							<DateTimePickerComponent
+								id='StartTime'
+								data-name='StartTime'
+								value={new Date(props.startTime || props.StartTime)}
+								format='dd/MM/yy hh:mm a'
+								className='e-field'
+							></DateTimePickerComponent>
+						</td>
+					</tr>
+					<tr>
+						<td className='e-textlabel'>Hasta</td>
+						<td>
+							<DateTimePickerComponent
+								id='EndTime'
+								data-name='EndTime'
+								value={new Date(props.endTime || props.EndTime)}
+								format='dd/MM/yy hh:mm a'
+								className='e-field'
+							></DateTimePickerComponent>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		);
+	}
+
 	render() {
 		return (
 			<>
-			<NavBar
-				imagen={Logo}
-				pathMain='MainPageAdmin'
-				pathCarrito='CarritoDeCompras'
-				pathCuenta='CuentaAdmin'
-				pathGaleria='GalleryAdmin'
-				pathTienda='MainPageEcomerceAdmin'
-				mostrarCarrito={false}
-			/>
-		
-			<ScheduleComponent
-				currentView='Month'
-				selectedDate={new Date(2019, 0, 11)}
-				eventSettings={ this.localData}
-				eventRendered={(args) => {
-					//console.log(args.data);
-					if (args.data.Type === 'Tipo2') {
-						args.element.style.backgroundColor = 'red';
-						args.element.style.color = 'white';
-					}
-				}}
-				popupOpen={this.handlePopupOpen}
-				fieldValidation={this.handleFieldValidation}
-				eventSave={this.handleEventSave}>
-				<Inject services={[Day, Week, WorkWeek, Month, Agenda]} />
-			</ScheduleComponent>
+				<NavBar
+					imagen={Logo}
+					pathMain='MainPageAdmin'
+					pathCarrito='CarritoDeCompras'
+					pathCuenta='CuentaAdmin'
+					pathGaleria='GalleryAdmin'
+					pathTienda='MainPageEcomerceAdmin'
+					mostrarCarrito={false}
+				/>
+
+				<ScheduleComponent
+					currentView='Month'
+					eventSettings={{ dataSource: localData }}
+					dragStart={this.onDragStart.bind(this)}
+					resizeStart={this.onResizeStart.bind(this)}
+					editorTemplate={this.editorWindowTemplate.bind(this)}
+				>
+					<ViewsDirective>
+						<ViewDirective
+							option='Day'
+							startHour='01:00'
+							interval={3}
+						></ViewDirective>
+						<ViewDirective option='Week'></ViewDirective>
+						<ViewDirective
+							option='Month'
+							showWeekNumber={true}
+							isSelected={true}
+						></ViewDirective>
+						<ViewDirective option='WorkWeek'></ViewDirective>
+						<ViewDirective option='Agenda'></ViewDirective>
+					</ViewsDirective>
+
+					<Inject
+						services={[Day, Week, WorkWeek, Month, Agenda, DragAndDrop, Resize]}
+					/>
+				</ScheduleComponent>
 			</>
 		);
 	}
