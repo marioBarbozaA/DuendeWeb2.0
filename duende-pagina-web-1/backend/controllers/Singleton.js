@@ -344,24 +344,6 @@ async  createAppointment(req, res, next) {
     next();
   }
 
-  async getAppointmentById(req, res, next) {
-    try {
-      const appointmentId = req.params.appointmentId; // Obtener el ID del compromiso de los parámetros de la URL
-      const appointment = await Appointment.findOne({ _id: appointmentId });
-
-      if (!appointment) {
-        return res
-          .status(404)
-          .json({ message: "El compromiso no se encuentra" });
-      }
-
-      res.status(200).json(appointment);
-    } catch (error) {
-      res.status(500).json({ message: `Error del servidor: ${error}` });
-    }
-    next();
-  }
-
   async getAllAppointments(req, res, next) {
     try {
       const appointments = await Appointment.find({});

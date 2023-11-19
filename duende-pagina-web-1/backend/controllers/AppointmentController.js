@@ -13,9 +13,6 @@ const createAppointment = async (req, res, next) => {
     await Singleton.deleteAppointment(req, res, next);
   };
   
-  const getAppointmentById = async (req, res, next) => {
-    await Singleton.getAppointmentById(req, res, next);
-  };
   
   const getAllAppointments = async (req, res, next) => {
     await Singleton.getAllAppointments(req, res, next);
@@ -25,6 +22,5 @@ const createAppointment = async (req, res, next) => {
     createAppointment,
     updateAppointment,
     deleteAppointment,
-    getAppointmentById,
     getAllAppointments,
   };
