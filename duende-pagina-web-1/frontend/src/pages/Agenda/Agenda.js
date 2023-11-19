@@ -14,7 +14,9 @@ import {
 	ViewDirective,
 	DragAndDrop,
 	Resize,
-	Schedule,
+	ResourcesDirective,
+	ResorceDirective,
+	ResourceDirective,
 } from '@syncfusion/ej2-react-schedule';
 import { DropDownListComponent } from '@syncfusion/ej2-react-dropdowns';
 import { DateTimePickerComponent } from '@syncfusion/ej2-react-calendars';
@@ -115,10 +117,26 @@ export default class Scheduler extends Component {
 							></DateTimePickerComponent>
 						</td>
 					</tr>
+					<tr>
+						<td className='e-textlabel'>Localidad</td>
+						<td>
+							<input
+								id='Location'
+								name='Location'
+								type='text'
+								className='e-field e-input'
+							/>
+						</td>
+					</tr>
 				</tbody>
 			</table>
 		);
 	}
+	resourceDataSource = [
+		{ Id: 1, Name: 'Cita', Color: '#ea7a57' },
+		{ Id: 2, Name: 'Entrega', Color: '#357CD2' },
+		{ Id: 3, Name: 'Otro', Color: '#7fa9ee' },
+	];
 
 	render() {
 		return (
@@ -140,6 +158,17 @@ export default class Scheduler extends Component {
 					resizeStart={this.onResizeStart.bind(this)}
 					editorTemplate={this.editorWindowTemplate.bind(this)}
 				>
+					<ResourcesDirective>
+						<ResourceDirective
+							field='Id'
+							title='Nombre Tipo'
+							name='Tipo'
+							textField='Name'
+							idFie1d='Id '
+							colorFie1d='Color'
+							dataSource={this.resourceDataSource}
+						></ResourceDirective>
+					</ResourcesDirective>
 					<ViewsDirective>
 						<ViewDirective
 							option='Day'
