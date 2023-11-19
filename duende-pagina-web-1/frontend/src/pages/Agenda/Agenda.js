@@ -15,8 +15,8 @@ import {
 	DragAndDrop,
 	Resize,
 	ResourcesDirective,
-	ResorceDirective,
 	ResourceDirective,
+
 } from '@syncfusion/ej2-react-schedule';
 import { DropDownListComponent } from '@syncfusion/ej2-react-dropdowns';
 import { DateTimePickerComponent } from '@syncfusion/ej2-react-calendars';
@@ -33,7 +33,7 @@ let localData = [
 		EventType: 'Entrega',
 		StartTime: new Date(2023, 10, 17, 6, 0),
 		EndTime: new Date(2023, 10, 17, 7, 0),
-		Location: 'Chepe Centro',
+		Details: 'Chepe Centro',
 	},
 	{
 		Id: 2,
@@ -41,7 +41,7 @@ let localData = [
 		EventType: 'Cita',
 		StartTime: new Date(2023, 10, 16, 6, 0),
 		EndTime: new Date(2023, 10, 16, 7, 0),
-		Location: 'Chepe Centro',
+		Details: 'Chepe Centro',
 	},
 ];
 L10n.load({
@@ -118,11 +118,11 @@ export default class Scheduler extends Component {
 						</td>
 					</tr>
 					<tr>
-						<td className='e-textlabel'>Localidad</td>
+						<td className='e-textlabel'>Detalles</td>
 						<td>
 							<input
-								id='Location'
-								name='Location'
+								id='Details'
+								name='Details'
 								type='text'
 								className='e-field e-input'
 							/>
