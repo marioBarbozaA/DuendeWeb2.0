@@ -1,23 +1,9 @@
-const AppointmentDecorator = require('./DecoratorInterface');
+const mongoose = require('mongoose');
 
-class EntregaDecorator extends AppointmentDecorator {
-    constructor(appointment) {
-        super(appointment);
-        this.deliveryDetails = '';
-        this.client = '';
-    }
 
-    getDetails() {
-        return `${super.getDetails()} - Entrega: ${this.deliveryDetails} - Cliente: ${this.client}`;
-    }
+const entregaSchema = new mongoose.Schema({
+    client: String,
+    // Otros campos específicos de Entrega
+});
 
-    setDeliveryDetails(details) {
-        this.deliveryDetails = details;
-    }
-
-    setClient(client) {
-        this.client = client;
-    }
-}
-
-module.exports = EntregaDecorator;
+module.exports = Appointment.discriminator('Entrega', entregaSchema);

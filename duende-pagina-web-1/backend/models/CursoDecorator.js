@@ -1,23 +1,9 @@
-const AppointmentDecorator = require('./DecoratorInterface');
+const mongoose = require('mongoose');
 
-class CursoDecorator extends AppointmentDecorator {
-    constructor(appointment) {
-        super(appointment);
-        this.courseDetails = '';
-        this.participantCount = 0;
-    }
 
-    getDetails() {
-        return `${super.getDetails()} - Curso: ${this.courseDetails} - Participantes: ${this.participantCount}`;
-    }
+const cursoSchema = new mongoose.Schema({
+    participants: Number,
+    // Otros campos específicos de Curso
+});
 
-    setCourseDetails(details) {
-        this.courseDetails = details;
-    }
-
-    setParticipantCount(count) {
-        this.participantCount = count;
-    }
-}
-
-module.exports = CursoDecorator;
+module.exports = Appointment.discriminator('Curso', cursoSchema);

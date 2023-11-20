@@ -1,28 +1,10 @@
-const AppointmentDecorator = require('./DecoratorInterface');
+const mongoose = require('mongoose');
 
-class ServicioDecorator extends AppointmentDecorator {
-    constructor(appointment) {
-        super(appointment);
-        this.serviceDetails = '';
-        this.client = '';
-        this.imageReference = '';
-    }
 
-    getDetails() {
-        return `${super.getDetails()} - Servicio: ${this.serviceDetails} - Cliente: ${this.client} - Imagen de referencia: ${this.imageReference}`;
-    }
+const servicioSchema = new mongoose.Schema({
+    client: String,
+    image: String,
+    // Otros campos específicos de Servicio
+});
 
-    setServiceDetails(details) {
-        this.serviceDetails = details;
-    }
-
-    setClient(client) {
-        this.client = client;
-    }
-
-    setImageReference(image) {
-        this.imageReference = image;
-    }
-}
-
-module.exports = ServicioDecorator;
+module.exports = Appointment.discriminator('Servicio', servicioSchema);
