@@ -51,11 +51,7 @@ L10n.load({
 		},
 	},
 });
-const eventTypeStyles = {
-	Entrega: { backgroundColor: '#43b44b' },
-	Cita: { backgroundColor: '#357cd2' },
-	Otro: { backgroundColor: '#a16ee5' },
-};
+
 export default class Scheduler extends Component {
 	fieldsData = {
 		id: 'Id',
@@ -143,19 +139,6 @@ export default class Scheduler extends Component {
 		);
 	}
 
-	eventRendered = args => {
-		console.log('Pruebaaaaaa' + args.data);
-		const eventType = args.data.EventType || 'Otro';
-
-		// Obtener los estilos CSS correspondientes al tipo de evento
-		const eventStyles = eventTypeStyles[eventType] || eventTypeStyles['Otro'];
-
-		// Aplicar los estilos al evento
-		Object.keys(eventStyles).forEach(style => {
-			args.element.style[style] = eventStyles[style];
-		});
-	};
-
 	render() {
 		return (
 			<>
@@ -180,7 +163,23 @@ export default class Scheduler extends Component {
 					resizeStart={this.onResizeStart.bind(this)}
 					showQuickInfo={false}
 					editorTemplate={this.editorWindowTemplate.bind(this)}
-					eventRender={this.eventRendered.bind(this)}
+					eventRendered={props => {
+						const eventType = props.data.EventType;
+
+						let color = '';
+						switch (eventType) {
+							case 'Cita':
+								color = '#1982C4';
+								break;
+							case 'Entrega':
+								color = '#6A4C93';
+								break;
+							default:
+								color = '#FF595E';
+						}
+
+						props.element.style.backgroundColor = color;
+					}}
 				>
 					<ViewsDirective>
 						<ViewDirective
