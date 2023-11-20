@@ -3,7 +3,10 @@ const bcrypt = require("bcrypt");
 
 const User = require("../models/auth/user.js");
 const Usertype = require("../models/auth/usertype.js");
-const Appointment = require("../models/appointment.js");
+//const Appointment = require("../models/appointment.js");
+const CursoDecorator = require('./CursoDecorator');
+const ServicioDecorator = require('./ServicioDecorator');
+const EntregaDecorator = require('./EntregaDecorator');
 const Product = require("../models/Product.js");
 const Message = require("../models/Message.js");
 const ShoppingCart = require("../models/ShoppingCart.js");
@@ -211,155 +214,171 @@ class Singleton {
   //-------------------------------------------------------------------------------------
   //                                Appointment Functions
   //-------------------------------------------------------------------------------------
-  async  isCollision(existingEvent, newEvent) {
-    // Lógica para verificar si hay traslape
-    return (
-        newEvent.StartTime < existingEvent.EndTime &&
-        newEvent.EndTime > existingEvent.StartTime
-    );
-}
-
-async  createAppointment(req, res, next) {
-  try {
-    const jsonAppointment = req.body;
-
-    // Verificar si hay traslapes con eventos existentes
-    const existingAppointments = await Appointment.find({
-        date: jsonAppointment.date,
-    });
-
-    const hasCollision = existingAppointments.some((existingEvent) =>
-        existingEvent.EventType === 'Cita' ||
-        jsonAppointment.EventType === 'Cita'
-            ? isCollision(existingEvent, jsonAppointment)
-            : false
-    );
-
-    if (hasCollision) {
-        return res.status(400).json({
-            state: false,
-            message: 'No se permite traslape con eventos de tipo Cita.',
-        });
-    }
-
-    // Crear el evento si no hay traslapes
-    await Appointment.create({
-        Subject: jsonAppointment.Subject,
-        EventType: jsonAppointment.EventType,
-        StartTime: jsonAppointment.StartTime,
-        EndTime: jsonAppointment.EndTime,
-        Details: jsonAppointment.Details,
-        status: jsonAppointment.status,
-    });
-
-    res.status(201).json({
-        state: true,
-        message: 'El compromiso se ha creado exitosamente',
-    });
-  } catch (error) {
-    res.status(500).json({ message: `Error del servidor: ${error}` });
-  }
-  next();
-}
-
-  async  updateAppointment(req, res, next) {
+  async createAppointment(req, res, next) {
     try {
+        const jsonAppointment = req.body;
+        let decoratedAppointment;
+
+        switch (jsonAppointment.type) {
+            case 'Curso':
+                decoratedAppointment = new Curso(jsonAppointment);
+                decoratedAppointment.setCourseDetails('Detalles del curso');
+                decoratedAppointment.setParticipantCount(jsonAppointment.participants);
+                break;
+            case 'Servicio':
+                decoratedAppointment = new Servicio(jsonAppointment);
+                decoratedAppointment.setServiceDetails('Detalles del servicio');
+                decoratedAppointment.setClient(jsonAppointment.client);
+                decoratedAppointment.setImageReference(jsonAppointment.image);
+                break;
+            case 'Entrega':
+                decoratedAppointment = new Entrega(jsonAppointment);
+                decoratedAppointment.setDeliveryDetails('Detalles de la entrega');
+                decoratedAppointment.setClient(jsonAppointment.client);
+                break;
+            default:
+                decoratedAppointment = new Appointment(jsonAppointment);
+        }
+
+        // Validar colisiones de tiempo
+        const collidesWith = await this.checkTimeCollisions(decoratedAppointment);
+
+        if (collidesWith.length > 0) {
+            // Aquí notificar a la administradora sobre las colisiones
+            return res.status(409).json({
+                message: 'La nueva entrada colisiona con eventos existentes. Notificar a la administradora.',
+            });
+        }
+
+        // Guardar el evento decorado en la base de datos
+        await decoratedAppointment.save();
+
+        res.status(201).json({ state: true, message: 'El compromiso se ha creado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ message: `Error del servidor: ${error}` });
+    }
+    next();
+}
+
+async updateAppointment(req, res, next) {
+  try {
       const jsonAppointment = req.body;
       const appointmentId = jsonAppointment._id;
 
-      const appointmentFound = await Appointment.findOne({
-          _id: appointmentId,
-      });
+      const appointmentFound = await Appointment.findOne({ _id: appointmentId });
 
       if (!appointmentFound) {
           return res.status(404).json({ message: 'El compromiso no se encuentra' });
       }
 
-      // Verificar si hay traslapes con eventos existentes
-      const existingAppointments = await Appointment.find({
-          date: jsonAppointment.date,
-          _id: { $ne: appointmentId }, // Excluir el evento actual
-      });
+      let decoratedAppointment;
 
-      const hasCollision = existingAppointments.some((existingEvent) =>
-          existingEvent.EventType === 'Cita' ||
-          jsonAppointment.EventType === 'Cita'
-              ? isCollision(existingEvent, jsonAppointment)
-              : false
-      );
+      switch (jsonAppointment.type) {
+          case 'Curso':
+              decoratedAppointment = new Curso(jsonAppointment);
+              decoratedAppointment.setCourseDetails('Detalles del curso');
+              decoratedAppointment.setParticipantCount(jsonAppointment.participants);
+              break;
+          case 'Servicio':
+              decoratedAppointment = new Servicio(jsonAppointment);
+              decoratedAppointment.setServiceDetails('Detalles del servicio');
+              decoratedAppointment.setClient(jsonAppointment.client);
+              decoratedAppointment.setImageReference(jsonAppointment.image);
+              break;
+          case 'Entrega':
+              decoratedAppointment = new Entrega(jsonAppointment);
+              decoratedAppointment.setDeliveryDetails('Detalles de la entrega');
+              decoratedAppointment.setClient(jsonAppointment.client);
+              break;
+          default:
+              decoratedAppointment = new Appointment(jsonAppointment);
+      }
 
-      if (hasCollision) {
-          return res.status(400).json({
-              state: false,
-              message: 'No se permite traslape con eventos de tipo Cita.',
+      // Validar colisiones de tiempo
+      const collidesWith = await this.checkTimeCollisions(decoratedAppointment, appointmentId);
+
+      if (collidesWith.length > 0) {
+          // Aquí notificar a la administradora sobre las colisiones
+          return res.status(409).json({
+              message: 'La modificación colisiona con eventos existentes. Notificar a la administradora.',
           });
       }
 
-      const updateFields = {
-          Subject: jsonAppointment.Subject,
-          EventType: jsonAppointment.EventType,
-          StartTime: jsonAppointment.StartTime,
-          EndTime: jsonAppointment.EndTime,
-          Details: jsonAppointment.Details,
-          status: jsonAppointment.status,
-      };
-
       // Actualizar el compromiso en la base de datos
-      await Appointment.updateOne({ _id: appointmentId }, { $set: updateFields });
+      await Appointment.updateOne({ _id: appointmentId }, { $set: jsonAppointment });
 
-      res.status(200).json({
-          state: true,
-          message: 'El compromiso se ha modificado exitosamente',
-      });
+      res.status(200).json({ state: true, message: 'El compromiso se ha modificado exitosamente' });
   } catch (error) {
       res.status(500).json({ message: `Error del servidor: ${error}` });
   }
   next();
 }
 
-  async deleteAppointment(req, res, next) {
+
+
+async deleteAppointment(req, res, next) {
     try {
-      const jsonAppointment = req.body;
-      const appointmentId = jsonAppointment._id;
+        const jsonAppointment = req.body;
+        const appointmentId = jsonAppointment._id;
 
-      const appointmentFound = await Appointment.findOne({
-        _id: appointmentId,
-      });
+        const appointmentFound = await Appointment.findOne({ _id: appointmentId });
 
-      if (!appointmentFound) {
-        return res
-          .status(404)
-          .json({ message: "El compromiso no se encuentra" });
-      }
+        if (!appointmentFound) {
+            return res.status(404).json({ message: 'El compromiso no se encuentra' });
+        }
 
-      await Appointment.deleteOne({ _id: jsonAppointment._id });
+        await Appointment.deleteOne({ _id: jsonAppointment._id });
 
-      res.status(200).json({
-        state: true,
-        message: "El compromiso se ha eliminado exitosamente",
-      });
+        res.status(200).json({ state: true, message: 'El compromiso se ha eliminado exitosamente' });
     } catch (error) {
-      res.status(500).json({ message: `Error del servidor: ${error}` });
+        res.status(500).json({ message: `Error del servidor: ${error}` });
     }
     next();
-  }
+}
 
-  async getAllAppointments(req, res, next) {
+async getAllAppointments(req, res, next) {
     try {
-      const appointments = await Appointment.find({});
+        const appointments = await Appointment.find({});
 
-      if (appointments.length === 0) {
-        return res
-          .status(404)
-          .json({ message: "No se encontraron compromisos en la agenda" });
-      }
+        if (appointments.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron compromisos en la agenda' });
+        }
 
-      res.status(200).json(appointments);
+        res.status(200).json(appointments);
     } catch (error) {
-      res.status(500).json({ message: `Error del servidor: ${error}` });
+        res.status(500).json({ message: `Error del servidor: ${error}` });
     }
     next();
-  }
+}
+
+async checkTimeCollisions(newAppointment, existingAppointmentId = null) {
+  const collidesWith = await Appointment.find({
+      _id: { $ne: existingAppointmentId },  // Excluir el evento existente al editar
+      $or: [
+          {
+              $and: [
+                  { StartTime: { $lt: newAppointment.EndTime } },
+                  { EndTime: { $gt: newAppointment.StartTime } },
+              ],
+          },
+          {
+              $and: [
+                  { StartTime: { $gte: newAppointment.StartTime } },
+                  { StartTime: { $lt: newAppointment.EndTime } },
+              ],
+          },
+          {
+              $and: [
+                  { EndTime: { $gt: newAppointment.StartTime } },
+                  { EndTime: { $lte: newAppointment.EndTime } },
+              ],
+          },
+      ],
+  });
+
+  return collidesWith;
+}
+
 
   //-------------------------------------------------------------------------------------
   // Gestion Usuarios
