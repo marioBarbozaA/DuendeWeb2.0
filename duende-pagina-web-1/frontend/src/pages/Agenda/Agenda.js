@@ -169,16 +169,21 @@ export default class Scheduler extends Component {
 						let color = '';
 						switch (eventType) {
 							case 'Cita':
-								color = '#1982C4';
+								color = 'rgba(25, 130, 196, 0.3)'; // Azul con menos opacidad
 								break;
 							case 'Entrega':
-								color = '#6A4C93';
+								color = 'rgba(255, 206, 86, 0.3)'; // Amarillo con menos opacidad
 								break;
 							default:
-								color = '#FF595E';
+								color = 'rgba(106, 76, 147, 0.3)'; // Púrpura con menos opacidad
 						}
 
 						props.element.style.backgroundColor = color;
+						props.element.style.border = `1px solid ${color.replace(
+							'0.3',
+							'1',
+						)}`; // Borde con opacidad completa
+						props.element.style.color = 'black';
 					}}
 				>
 					<ViewsDirective>
