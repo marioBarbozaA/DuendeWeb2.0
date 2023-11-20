@@ -14,9 +14,6 @@ import {
 	ViewDirective,
 	DragAndDrop,
 	Resize,
-	ResourcesDirective,
-	ResourceDirective,
-
 } from '@syncfusion/ej2-react-schedule';
 import { DropDownListComponent } from '@syncfusion/ej2-react-dropdowns';
 import { DateTimePickerComponent } from '@syncfusion/ej2-react-calendars';
@@ -54,7 +51,20 @@ L10n.load({
 		},
 	},
 });
+const eventTypeStyles = {
+	Entrega: { backgroundColor: '#43b44b' },
+	Cita: { backgroundColor: '#357cd2' },
+	Otro: { backgroundColor: '#a16ee5' },
+};
 export default class Scheduler extends Component {
+	fieldsData = {
+		id: 'Id',
+		subject: { name: 'Subject', validation: { required: true } },
+		type: { name: 'EventType', validation: { required: true } },
+		details: { name: 'Details', validation: { required: true } },
+		startTime: { name: 'StartTime', validation: { required: true } },
+		endTime: { name: 'EndTime', validation: { required: true } },
+	};
 	onDragStart = args => {
 		//args.scroll = { enabled: false };
 		args.interval = 10;
@@ -88,7 +98,7 @@ export default class Scheduler extends Component {
 								dataSource={['Entrega', 'Cita', 'Otro']}
 								placeholder='Escoge el tipo'
 								data-name='EventType'
-								value={props.EventType || null}
+								value={props.EventType || 'Otro'}
 								className='e-field'
 							></DropDownListComponent>
 						</td>
@@ -132,11 +142,19 @@ export default class Scheduler extends Component {
 			</table>
 		);
 	}
-	resourceDataSource = [
-		{ Id: 1, Name: 'Cita', Color: '#ea7a57' },
-		{ Id: 2, Name: 'Entrega', Color: '#357CD2' },
-		{ Id: 3, Name: 'Otro', Color: '#7fa9ee' },
-	];
+
+	eventRendered = args => {
+		console.log('Pruebaaaaaa' + args.data);
+		const eventType = args.data.EventType || 'Otro';
+
+		// Obtener los estilos CSS correspondientes al tipo de evento
+		const eventStyles = eventTypeStyles[eventType] || eventTypeStyles['Otro'];
+
+		// Aplicar los estilos al evento
+		Object.keys(eventStyles).forEach(style => {
+			args.element.style[style] = eventStyles[style];
+		});
+	};
 
 	render() {
 		return (
@@ -153,22 +171,17 @@ export default class Scheduler extends Component {
 
 				<ScheduleComponent
 					currentView='Month'
-					eventSettings={{ dataSource: localData }}
+					eventSettings={{
+						dataSource: localData,
+						//template: this.eventTemplate.bind(this),
+						fields: this.fieldsData,
+					}}
 					dragStart={this.onDragStart.bind(this)}
 					resizeStart={this.onResizeStart.bind(this)}
+					showQuickInfo={false}
 					editorTemplate={this.editorWindowTemplate.bind(this)}
+					eventRender={this.eventRendered.bind(this)}
 				>
-					<ResourcesDirective>
-						<ResourceDirective
-							field='Id'
-							title='Nombre Tipo'
-							name='Tipo'
-							textField='Name'
-							idFie1d='Id '
-							colorFie1d='Color'
-							dataSource={this.resourceDataSource}
-						></ResourceDirective>
-					</ResourcesDirective>
 					<ViewsDirective>
 						<ViewDirective
 							option='Day'
