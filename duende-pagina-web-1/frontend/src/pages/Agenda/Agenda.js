@@ -31,6 +31,10 @@ let localData = [
 		StartTime: new Date(2023, 10, 17, 6, 0),
 		EndTime: new Date(2023, 10, 17, 7, 0),
 		Details: 'Chepe Centro',
+		CustomerName: '',
+		ReferenceImage: '',
+		OrderNumber: '',
+		DeliveryCustomerName: '',
 	},
 	{
 		Id: 2,
@@ -39,6 +43,10 @@ let localData = [
 		StartTime: new Date(2023, 10, 16, 6, 0),
 		EndTime: new Date(2023, 10, 16, 7, 0),
 		Details: 'Chepe Centro',
+		CustomerName: '',
+		ReferenceImage: '',
+		OrderNumber: '',
+		DeliveryCustomerName: '',
 	},
 ];
 L10n.load({
@@ -53,6 +61,13 @@ L10n.load({
 });
 
 export default class Scheduler extends Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			currentEventType: null,
+		};
+	}
+
 	fieldsData = {
 		id: 'Id',
 		subject: { name: 'Subject', validation: { required: true } },
@@ -60,6 +75,10 @@ export default class Scheduler extends Component {
 		details: { name: 'Details', validation: { required: true } },
 		startTime: { name: 'StartTime', validation: { required: true } },
 		endTime: { name: 'EndTime', validation: { required: true } },
+		CustomerName: { name: 'CustomerName' },
+		ReferenceImage: { name: 'ReferenceImage' },
+		OrderNumber: { name: 'OrderNumber' },
+		DeliveryCustomerName: { name: 'DeliveryCustomerName' },
 	};
 	onDragStart = args => {
 		//args.scroll = { enabled: false };
@@ -72,6 +91,9 @@ export default class Scheduler extends Component {
 	};
 
 	editorWindowTemplate(props) {
+		const eventType = this.state.currentEventType || null;
+
+		console.log(eventType);
 		return (
 			<table className='custom-event-editor'>
 				<tbody>
@@ -94,11 +116,67 @@ export default class Scheduler extends Component {
 								dataSource={['Entrega', 'Cita', 'Otro']}
 								placeholder='Escoge el tipo'
 								data-name='EventType'
-								value={props.EventType || 'Otro'}
+								value={this.state.currentEventType}
 								className='e-field'
+								change={args => {
+									const newEventType = args.value || null;
+									this.setState({ currentEventType: newEventType });
+								}}
 							></DropDownListComponent>
 						</td>
 					</tr>
+					{eventType === 'Cita' && (
+						<tr>
+							<td className='e-textlabel'>Nombre del Cliente</td>
+							<td>
+								<input
+									id='CustomerName'
+									name='CustomerName'
+									type='text'
+									className='e-field e-input'
+								/>
+							</td>
+						</tr>
+					)}
+					{eventType === 'Cita' && (
+						<tr>
+							<td className='e-textlabel'>Imagen de Referencia</td>
+							<td>
+								<input
+									id='ReferenceImage'
+									name='ReferenceImage'
+									type='file' // Puedes cambiar esto según tus necesidades
+									className='e-field e-input'
+								/>
+							</td>
+						</tr>
+					)}
+					{eventType === 'Entrega' && (
+						<tr>
+							<td className='e-textlabel'>Número de Pedido</td>
+							<td>
+								<input
+									id='OrderNumber'
+									name='OrderNumber'
+									type='text'
+									className='e-field e-input'
+								/>
+							</td>
+						</tr>
+					)}
+					{eventType === 'Entrega' && (
+						<tr>
+							<td className='e-textlabel'>Nombre del Cliente</td>
+							<td>
+								<input
+									id='DeliveryCustomerName'
+									name='DeliveryCustomerName'
+									type='text'
+									className='e-field e-input'
+								/>
+							</td>
+						</tr>
+					)}
 					<tr>
 						<td className='e-textlabel'>De</td>
 						<td>
