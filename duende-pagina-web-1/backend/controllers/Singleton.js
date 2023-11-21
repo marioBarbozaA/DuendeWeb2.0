@@ -1217,7 +1217,12 @@ class Singleton {
       if (!sale) {
         throw new Error('Sale not found');
       }
-
+      // Creamos una instancia de SalesObservable
+      const salesObservable = new SalesObservable
+      // Creamos una instancia de SaleObserver
+      const saleObserver = new SaleObserver();
+      // Suscribimos el observer a la venta observable
+      salesObservable.addObserver(saleObserver);
       console.log("Singleton updateSale saleData:", saleData);
       console.log("Singleton updateSale sale:", sale);
       // If the sale is being updated to "Aceptado", update the inventory
@@ -1225,6 +1230,7 @@ class Singleton {
 
       if (saleData.status === 'Aceptado' && sale.status !== 'Aceptado') {
         // entonces aqui se pone la logica del observable y notificar
+        salesObservable.notify("Aceptado");
         for (const product of sale.products) {
           console.log("Singleton updateSale product:", product);
           this.updateInventory(product._id, product.quantity);
