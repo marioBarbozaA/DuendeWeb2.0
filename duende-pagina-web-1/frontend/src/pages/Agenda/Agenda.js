@@ -31,10 +31,10 @@ let localData = [
 		StartTime: new Date(2023, 10, 17, 6, 0),
 		EndTime: new Date(2023, 10, 17, 7, 0),
 		Details: 'Chepe Centro',
-		CustomerName: '',
-		ReferenceImage: '',
-		OrderNumber: '',
-		DeliveryCustomerName: '',
+		CustomerName: 'Naho',
+		ReferenceImage: '/Naho',
+		OrderNumber: '12',
+		DeliveryCustomerName: 'Naho bo',
 	},
 	{
 		Id: 2,
@@ -43,10 +43,10 @@ let localData = [
 		StartTime: new Date(2023, 10, 16, 6, 0),
 		EndTime: new Date(2023, 10, 16, 7, 0),
 		Details: 'Chepe Centro',
-		CustomerName: '',
-		ReferenceImage: '',
-		OrderNumber: '',
-		DeliveryCustomerName: '',
+		CustomerName: 'Juan',
+		ReferenceImage: '/mario',
+		OrderNumber: '123',
+		DeliveryCustomerName: 'Marioneta',
 	},
 ];
 L10n.load({
@@ -61,13 +61,6 @@ L10n.load({
 });
 
 export default class Scheduler extends Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			currentEventType: null,
-		};
-	}
-
 	fieldsData = {
 		id: 'Id',
 		subject: { name: 'Subject', validation: { required: true } },
@@ -91,9 +84,6 @@ export default class Scheduler extends Component {
 	};
 
 	editorWindowTemplate(props) {
-		const eventType = this.state.currentEventType || null;
-
-		console.log(eventType);
 		return (
 			<table className='custom-event-editor'>
 				<tbody>
@@ -116,16 +106,13 @@ export default class Scheduler extends Component {
 								dataSource={['Entrega', 'Cita', 'Otro']}
 								placeholder='Escoge el tipo'
 								data-name='EventType'
-								value={this.state.currentEventType}
+								value={props.EventType || 'Otro'}
 								className='e-field'
-								change={args => {
-									const newEventType = args.value || null;
-									this.setState({ currentEventType: newEventType });
-								}}
+								change={this.onEventTypeChange} // Agregar este manejador de evento
 							></DropDownListComponent>
 						</td>
 					</tr>
-					{eventType === 'Cita' && (
+					{props.EventType === 'Cita' && (
 						<tr>
 							<td className='e-textlabel'>Nombre del Cliente</td>
 							<td>
@@ -138,20 +125,20 @@ export default class Scheduler extends Component {
 							</td>
 						</tr>
 					)}
-					{eventType === 'Cita' && (
+					{props.EventType === 'Cita' && (
 						<tr>
 							<td className='e-textlabel'>Imagen de Referencia</td>
 							<td>
 								<input
 									id='ReferenceImage'
 									name='ReferenceImage'
-									type='file' // Puedes cambiar esto según tus necesidades
+									type='text' // Puedes cambiar esto según tus necesidades
 									className='e-field e-input'
 								/>
 							</td>
 						</tr>
 					)}
-					{eventType === 'Entrega' && (
+					{props.EventType === 'Entrega' && (
 						<tr>
 							<td className='e-textlabel'>Número de Pedido</td>
 							<td>
@@ -164,7 +151,7 @@ export default class Scheduler extends Component {
 							</td>
 						</tr>
 					)}
-					{eventType === 'Entrega' && (
+					{props.EventType === 'Entrega' && (
 						<tr>
 							<td className='e-textlabel'>Nombre del Cliente</td>
 							<td>
@@ -216,6 +203,14 @@ export default class Scheduler extends Component {
 			</table>
 		);
 	}
+
+	// Agregar un método para manejar el cambio de tipo de evento
+	onEventTypeChange = args => {
+		// Puedes realizar acciones adicionales si es necesario
+		// Por ejemplo, puedes actualizar el estado con el nuevo tipo de evento seleccionado
+		// y dejar que la renderización condicional maneje la visibilidad de los campos adicionales.
+		this.setState({ eventType: args.value });
+	};
 
 	render() {
 		return (
