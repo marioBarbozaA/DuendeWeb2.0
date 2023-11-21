@@ -1244,9 +1244,44 @@ class Singleton {
       res.status(500).json({ message: "Server error: " + error });
     }
   }
+  /////////////////////////////////////
+  ////////////  Notification  //////////////
+  /////////////////////////////////////
+  async createNotification(notificationData) {
+    try {
+      const notification = await Notification.create(notificationData);
+      console.log('Notificación creada:', notification);
+      return notification;
+    } catch (error) {
+      console.error('Error al crear la notificación:', error);
+      throw error;
+    }
+  }
 
+  async getAllNotifications() {
+    try {
+      const notifications = await Notification.find();
+      return notifications;
+    } catch (error) {
+      console.error('Error al obtener todas las notificaciones:', error);
+      throw error;
+    }
+  }
+
+  async getUserNotifications(userId) {
+    try {
+      const notifications = await Notification.find({ user: userId });
+      return notifications;
+    } catch (error) {
+      console.error('Error al obtener las notificaciones del usuario:', error);
+      throw error;
+    }
+  }
 
 }
+
+
+
 
 
 let instance = null;
