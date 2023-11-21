@@ -91,9 +91,6 @@ export default class Scheduler extends Component {
 	};
 
 	editorWindowTemplate(props) {
-		const eventType = this.state.currentEventType || null;
-
-		console.log(eventType);
 		return (
 			<table className='custom-event-editor'>
 				<tbody>
@@ -116,67 +113,11 @@ export default class Scheduler extends Component {
 								dataSource={['Entrega', 'Cita', 'Otro']}
 								placeholder='Escoge el tipo'
 								data-name='EventType'
-								value={this.state.currentEventType}
+								value={props.EventType || 'Otro'}
 								className='e-field'
-								change={args => {
-									const newEventType = args.value || null;
-									this.setState({ currentEventType: newEventType });
-								}}
 							></DropDownListComponent>
 						</td>
 					</tr>
-					{eventType === 'Cita' && (
-						<tr>
-							<td className='e-textlabel'>Nombre del Cliente</td>
-							<td>
-								<input
-									id='CustomerName'
-									name='CustomerName'
-									type='text'
-									className='e-field e-input'
-								/>
-							</td>
-						</tr>
-					)}
-					{eventType === 'Cita' && (
-						<tr>
-							<td className='e-textlabel'>Imagen de Referencia</td>
-							<td>
-								<input
-									id='ReferenceImage'
-									name='ReferenceImage'
-									type='file' // Puedes cambiar esto según tus necesidades
-									className='e-field e-input'
-								/>
-							</td>
-						</tr>
-					)}
-					{eventType === 'Entrega' && (
-						<tr>
-							<td className='e-textlabel'>Número de Pedido</td>
-							<td>
-								<input
-									id='OrderNumber'
-									name='OrderNumber'
-									type='text'
-									className='e-field e-input'
-								/>
-							</td>
-						</tr>
-					)}
-					{eventType === 'Entrega' && (
-						<tr>
-							<td className='e-textlabel'>Nombre del Cliente</td>
-							<td>
-								<input
-									id='DeliveryCustomerName'
-									name='DeliveryCustomerName'
-									type='text'
-									className='e-field e-input'
-								/>
-							</td>
-						</tr>
-					)}
 					<tr>
 						<td className='e-textlabel'>De</td>
 						<td>
