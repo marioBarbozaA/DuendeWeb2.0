@@ -30,7 +30,7 @@ import GalleryAdmin from './pages/Gallery/GalleryAdmin/GalleryAdmin.js';
 import CuentaAdmin from './pages/GestionUsuarios/CuentaAdmin/Cuenta.js';
 import { AuthProvider } from './Context/Authcontext.js';
 import ProtectedRoute from './ProtectedRoute.js';
-import Scheduler from './pages/Agenda/Agenda.js';
+import Scheduler from './pages/Agenda/Agenda.jsx';
 
 function App() {
 	return (
