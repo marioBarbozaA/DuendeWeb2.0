@@ -16,7 +16,7 @@ const createNotification = async (req, res, next) => {
     console.log('Received notification data (after):', notificationData);
 
     try {
-        const notification = await Singleton.createNotification(notificationData);
+        const notification = await SingletonDAO.createNotification(notificationData);
         res.status(201).json(notification);
     } catch (error) {
         console.error(error);
@@ -26,7 +26,7 @@ const createNotification = async (req, res, next) => {
 
 const getAllNotifications = async (req, res, next) => {
     try {
-        const notifications = await Singleton.getAllNotifications();
+        const notifications = await SingletonDAO.getAllNotifications();
         res.status(200).json(notifications);
     } catch (error) {
         console.error(error);
@@ -37,7 +37,7 @@ const getAllNotifications = async (req, res, next) => {
 const getUserNotifications = async (req, res, next) => {
     console.log('Received user ID:', req.params.userId);
     try {
-        const notifications = await Singleton.getUserNotifications(req.params.userId);
+        const notifications = await SingletonDAO.getUserNotifications(req.params.userId);
         res.status(200).json(notifications);
     } catch (error) {
         console.error(error);

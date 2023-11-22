@@ -12,6 +12,7 @@ const Sale = require("../models/Sales.js");
 const observable = require("../models/observer/Observable.js");
 const SaleObserver = require("../models/observer/SalesObserver.js");
 const SalesObservable = require("../models/observer/SalesObservable.js");
+const myNotification = require("../models/Notification.js");
 
 const { createAccessToken } = require("../libs/jwt.js");
 const { TOKEN_SECRET } = require("../config/config.js");
@@ -1225,15 +1226,17 @@ class Singleton {
       salesObservable.addObserver(saleObserver);
       console.log("Singleton updateSale saleData:", saleData);
       console.log("Singleton updateSale sale:", sale);
+
       // If the sale is being updated to "Aceptado", update the inventory
       // quiere decir que aqui se pone la logica del observable y notificar?????????
 
       if (saleData.status === 'Aceptado' && sale.status !== 'Aceptado') {
         // entonces aqui se pone la logica del observable y notificar
-        salesObservable.notify("Aceptado");
+
         for (const product of sale.products) {
           console.log("Singleton updateSale product:", product);
           this.updateInventory(product._id, product.quantity);
+          salesObservable.notify("Aceptado");
         }
       }
 
@@ -1249,7 +1252,7 @@ class Singleton {
   /////////////////////////////////////
   async createNotification(notificationData) {
     try {
-      const notification = await Notification.create(notificationData);
+      const notification = await myNotification.create(notificationData);
       console.log('Notificación creada:', notification);
       return notification;
     } catch (error) {
@@ -1260,7 +1263,7 @@ class Singleton {
 
   async getAllNotifications() {
     try {
-      const notifications = await Notification.find();
+      const notifications = await myNotification.find();
       return notifications;
     } catch (error) {
       console.error('Error al obtener todas las notificaciones:', error);
@@ -1270,7 +1273,7 @@ class Singleton {
 
   async getUserNotifications(userId) {
     try {
-      const notifications = await Notification.find({ user: userId });
+      const notifications = await myNotification.find({ user: userId });
       return notifications;
     } catch (error) {
       console.error('Error al obtener las notificaciones del usuario:', error);
@@ -1279,8 +1282,6 @@ class Singleton {
   }
 
 }
-
-
 
 
 
