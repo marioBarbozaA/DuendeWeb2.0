@@ -1171,6 +1171,13 @@ class Singleton {
         throw new Error("Sale not found");
       }
       await this.emptyCart(saleData.userBuyer);
+      // Creamos una instancia de SalesObservable
+      const salesObservable = new SalesObservable
+      // Creamos una instancia de SaleObserver
+      const saleObserver = new SaleObserver();
+      // Suscribimos el observer a la venta observable
+      salesObservable.addObserver(saleObserver);
+      salesObservable.notify("Pendiente");
       return newSale;
     } catch (error) {
       throw new Error("Server error: " + error);
@@ -1218,12 +1225,7 @@ class Singleton {
       if (!sale) {
         throw new Error('Sale not found');
       }
-      // Creamos una instancia de SalesObservable
-      const salesObservable = new SalesObservable
-      // Creamos una instancia de SaleObserver
-      const saleObserver = new SaleObserver();
-      // Suscribimos el observer a la venta observable
-      salesObservable.addObserver(saleObserver);
+
       console.log("Singleton updateSale saleData:", saleData);
       console.log("Singleton updateSale sale:", sale);
 
