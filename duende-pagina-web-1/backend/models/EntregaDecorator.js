@@ -21,4 +21,4 @@ class Entrega extends Appointment {
     }
 }
 
-module.exports = mongoose.model('Entrega', entregaSchema);
+module.exports = Appointment.discriminator('Entrega', entregaSchema);
