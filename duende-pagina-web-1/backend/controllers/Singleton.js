@@ -9,10 +9,8 @@ const Message = require("../models/Message.js");
 const ShoppingCart = require("../models/ShoppingCart.js");
 const Gallery = require("../models/GalleryImage.js");
 const Sale = require("../models/Sales.js");
-const observable = require("../models/observer/Observable.js");
-const SaleObserver = require("../models/observer/SalesObserver.js");
-const SalesObservable = require("../models/observer/SalesObservable.js");
-const myNotification = require("../models/Notification.js");
+const NotificationModel = require("../models/Notification.js");
+// const NotificationManager =  require("../models/NotificationManager.js");
 
 const { createAccessToken } = require("../libs/jwt.js");
 const { TOKEN_SECRET } = require("../config/config.js");
@@ -1171,13 +1169,8 @@ class Singleton {
         throw new Error("Sale not found");
       }
       await this.emptyCart(saleData.userBuyer);
-      // Creamos una instancia de SalesObservable
-      const salesObservable = new SalesObservable
-      // Creamos una instancia de SaleObserver
-      const saleObserver = new SaleObserver();
-      // Suscribimos el observer a la venta observable
-      salesObservable.addObserver(saleObserver);
-      salesObservable.notify("Pendiente");
+
+      this.createNotification(saleData);
       return newSale;
     } catch (error) {
       throw new Error("Server error: " + error);
@@ -1254,7 +1247,7 @@ class Singleton {
   /////////////////////////////////////
   async createNotification(notificationData) {
     try {
-      const notification = await myNotification.create(notificationData);
+      const notification = await NotificationModel.create(notificationData);
       console.log('Notificación creada:', notification);
       return notification;
     } catch (error) {
@@ -1265,7 +1258,7 @@ class Singleton {
 
   async getAllNotifications() {
     try {
-      const notifications = await myNotification.find();
+      const notifications = await NotificationModel.find();
       return notifications;
     } catch (error) {
       console.error('Error al obtener todas las notificaciones:', error);
@@ -1273,10 +1266,12 @@ class Singleton {
     }
   }
 
-  async getUserNotifications(userId) {
+  async getUserNotifications(req, res, next) {
     try {
-      const notifications = await myNotification.find({ user: userId });
-      return notifications;
+      console.log('getUserNotifications singleton:', req.params.userId);
+      const notifications = await NotificationModel.find({ user: req.params.userId });
+      console.log('Notificaciones del usuario:', notifications);
+      return notifications; 
     } catch (error) {
       console.error('Error al obtener las notificaciones del usuario:', error);
       throw error;

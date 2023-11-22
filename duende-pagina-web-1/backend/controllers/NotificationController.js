@@ -26,7 +26,7 @@ const createNotification = async (req, res, next) => {
 
 const getAllNotifications = async (req, res, next) => {
     try {
-        const notifications = await SingletonDAO.getAllNotifications();
+        const notifications = await SingletonDAO.getAllNotifications(req, res, next);
         res.status(200).json(notifications);
     } catch (error) {
         console.error(error);
@@ -37,8 +37,9 @@ const getAllNotifications = async (req, res, next) => {
 const getUserNotifications = async (req, res, next) => {
     console.log('Received user ID:', req.params.userId);
     try {
-        const notifications = await SingletonDAO.getUserNotifications(req.params.userId);
-        res.status(200).json(notifications);
+        const notifications = await SingletonDAO.getUserNotifications(req, res, next);
+        console.log('Notifications:', notifications);
+        res.status(200).json({ notifications });
     } catch (error) {
         console.error(error);
         res.status(500).json({ msg: 'Server error' + error });

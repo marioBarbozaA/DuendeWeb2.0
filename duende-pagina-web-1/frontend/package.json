@@ -4,6 +4,7 @@
   "homepage": "https://gitname.github.io/react-gh-pages",
   "private": true,
   "dependencies": {
+    "@syncfusion/ej2": "^23.2.4",
     "@syncfusion/ej2-base": "^23.1.41",
     "@syncfusion/ej2-data": "^23.1.44",
     "@syncfusion/ej2-react-dropdowns": "^23.1.44",

@@ -1,6 +1,8 @@
 const { getInstance: getSingleton } = require('./Singleton.js');
 const SingletonDAO = getSingleton();
 const Sale = require('../models/Sales.js');
+const NotificationManager = require('../models/observer/NotificationManager.js');
+
 
 const newSale = async (req, res) => {
     console.log('Sale controller...');
@@ -62,6 +64,15 @@ const newSale = async (req, res) => {
 
       // Call your Singleton method to create a new sale
       const newSale = await SingletonDAO.createSale(saleData);
+
+      // Create a new notification manager
+      const notificationManager = new NotificationManager();
+
+      const newSaleObserver = new newSaleObserver();
+
+      notificationManager.subscribe(newSaleObserver);
+
+      notificationManager.notify(newSale);
   
       // Send the response to the frontend
       res.status(201).json(newSale);
