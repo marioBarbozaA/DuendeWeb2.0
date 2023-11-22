@@ -36,10 +36,9 @@ L10n.load({
 });
 const Scheduler = () => {
 	// create const use state event type and setEventType
-	
+
 	const [eventTypes, setEventTypes] = useState({});
 
-	
 	const [localData, setLocalData] = useState([
 		{
 			Id: 1,
@@ -69,11 +68,11 @@ const Scheduler = () => {
 
 	// initialize eventTypes with initial event types from localData
 	useEffect(() => {
-	  const initialEventTypes = {};
-	  localData.forEach((event) => {
-		initialEventTypes[event.Id] = event.EventType || 'Otro';
-	  });
-	  setEventTypes(initialEventTypes);
+		const initialEventTypes = {};
+		localData.forEach(event => {
+			initialEventTypes[event.Id] = event.EventType || 'Otro';
+		});
+		setEventTypes(initialEventTypes);
 	}, [localData]);
 
 	const fieldsData = {
@@ -97,10 +96,9 @@ const Scheduler = () => {
 		//args.scroll = { enabled: false };
 		args.interval = 10;
 	};
-	const Cita = (props) => {
-		console.log("Cita props",props);
-		console.log(Object.keys(props).length)
-
+	const Cita = props => {
+		console.log('Cita props', props);
+		console.log(Object.keys(props).length);
 
 		return (
 			<table className='custom-event-editor'>
@@ -124,12 +122,18 @@ const Scheduler = () => {
 								dataSource={['Entrega', 'Cita', 'Otro']}
 								placeholder='Escoge el tipo'
 								data-name='EventType'
-								value={eventTypes[props.Id] }
+								value={eventTypes[props.Id]}
 								className='e-field'
-								enabled={Object.keys(props).length <= 0 || Object.keys(props).length == 3} 
-								change={(e) => {
-                setEventTypes(prevEventTypes => ({ ...prevEventTypes, [props.Id]: e.value }))
-              }}
+								enabled={
+									Object.keys(props).length <= 0 ||
+									Object.keys(props).length == 3
+								}
+								change={e => {
+									setEventTypes(prevEventTypes => ({
+										...prevEventTypes,
+										[props.Id]: e.value,
+									}));
+								}}
 							></DropDownListComponent>
 						</td>
 					</tr>
@@ -198,8 +202,8 @@ const Scheduler = () => {
 		);
 	};
 	const Entrega = props => {
-		console.log("Entrega props",props);
-		console.log(Object.keys(props).length)
+		console.log('Entrega props', props);
+		console.log(Object.keys(props).length);
 
 		return (
 			<table className='custom-event-editor'>
@@ -223,12 +227,18 @@ const Scheduler = () => {
 								dataSource={['Entrega', 'Cita', 'Otro']}
 								placeholder='Escoge el tipo'
 								data-name='EventType'
-								value={eventTypes[props.Id] }
+								value={eventTypes[props.Id]}
 								className='e-field'
-								enabled={Object.keys(props).length <= 0 || Object.keys(props).length == 3} 
-								change={(e) => {
-									setEventTypes(prevEventTypes => ({ ...prevEventTypes, [props.Id]: e.value }))
-								  }}
+								enabled={
+									Object.keys(props).length <= 0 ||
+									Object.keys(props).length == 3
+								}
+								change={e => {
+									setEventTypes(prevEventTypes => ({
+										...prevEventTypes,
+										[props.Id]: e.value,
+									}));
+								}}
 							></DropDownListComponent>
 						</td>
 					</tr>
@@ -297,8 +307,8 @@ const Scheduler = () => {
 		);
 	};
 	const Otra = props => {
-		console.log("Otra props",props);
-		console.log(Object.keys(props).length)
+		console.log('Otra props', props);
+		console.log(Object.keys(props).length);
 		return (
 			<table className='custom-event-editor'>
 				<tbody>
@@ -321,12 +331,18 @@ const Scheduler = () => {
 								dataSource={['Entrega', 'Cita', 'Otro']}
 								placeholder='Escoge el tipo'
 								data-name='EventType'
-								value={eventTypes[props.Id] }
+								value={eventTypes[props.Id]}
 								className='e-field'
-								enabled={Object.keys(props).length <= 0 || Object.keys(props).length == 3} 
-								change={(e) => {
-									setEventTypes(prevEventTypes => ({ ...prevEventTypes, [props.Id]: e.value }))
-								  }}
+								enabled={
+									Object.keys(props).length <= 0 ||
+									Object.keys(props).length == 3
+								}
+								change={e => {
+									setEventTypes(prevEventTypes => ({
+										...prevEventTypes,
+										[props.Id]: e.value,
+									}));
+								}}
 							></DropDownListComponent>
 						</td>
 					</tr>
@@ -392,15 +408,13 @@ const Scheduler = () => {
 				dragStart={onDragStart}
 				resizeStart={onResizeStart}
 				showQuickInfo={false}
-				editorTemplate={(props) =>
-					eventTypes[props.Id] === 'Cita' ? (
-					  Cita(props)
-					) : eventTypes[props.Id] === 'Entrega' ? (
-					  Entrega(props)
-					) : (
-					  Otra(props)
-					)
-				  }
+				editorTemplate={props =>
+					eventTypes[props.Id] === 'Cita'
+						? Cita(props)
+						: eventTypes[props.Id] === 'Entrega'
+						? Entrega(props)
+						: Otra(props)
+				}
 				eventRendered={props => {
 					const eventType = props.data.EventType;
 
