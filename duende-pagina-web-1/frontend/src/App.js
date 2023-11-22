@@ -30,6 +30,7 @@ import GalleryAdmin from './pages/Gallery/GalleryAdmin/GalleryAdmin.js';
 import CuentaAdmin from './pages/GestionUsuarios/CuentaAdmin/Cuenta.js';
 import { AuthProvider } from './Context/Authcontext.js';
 import ProtectedRoute from './ProtectedRoute.js';
+import Scheduler from './pages/Agenda/Agenda.js';
 
 function App() {
 	return (
@@ -43,6 +44,7 @@ function App() {
 							<Route path='/Recovery' element={<Recuperacion />} />
 							<Route path='/Login' element={<Login />} />
 							<Route path='/Register' element={<Register />} />
+							<Route path='/Agenda' element={<Scheduler />} />
 
 							<Route element={<ProtectedRoute />}>
 								<Route path='/MainPageUser' element={<MainPageUser />} />
