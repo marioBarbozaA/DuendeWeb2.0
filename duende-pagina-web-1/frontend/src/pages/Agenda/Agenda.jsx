@@ -36,7 +36,7 @@ L10n.load({
 });
 const Scheduler = () => {
 	// create const use state event type and setEventType
-	const [eventType, setEventType] = useState('Otro');
+	const [eventType, setEventType] = useState("Otra");
 	// create a useState de los datos llamado local data
 	const [localData, setLocalData] = useState([
 		{
@@ -86,10 +86,10 @@ const Scheduler = () => {
 		//args.scroll = { enabled: false };
 		args.interval = 10;
 	};
-	const Cita = props => {
-		//create a use Effect 
-		
-		console.log(props);
+	const Cita = (props) => {
+		console.log("Cita props",props);
+
+
 		return (
 			<table className='custom-event-editor'>
 				<tbody>
@@ -183,6 +183,8 @@ const Scheduler = () => {
 		);
 	};
 	const Entrega = props => {
+		console.log("Entrega props",props);
+
 		return (
 			<table className='custom-event-editor'>
 				<tbody>
@@ -276,6 +278,8 @@ const Scheduler = () => {
 		);
 	};
 	const Otra = props => {
+		console.log("Otra props",props);
+
 		return (
 			<table className='custom-event-editor'>
 				<tbody>
@@ -367,11 +371,9 @@ const Scheduler = () => {
 				resizeStart={onResizeStart}
 				showQuickInfo={false}
 				editorTemplate={
-					//eventType === 'Cita' ? Cita : eventType === 'Entrega' ? Entrega : Otra
+					eventType === 'Cita' ? Cita : eventType === 'Entrega' ? Entrega : Otra 
 					
-						Cita 
-					
-				}
+					}
 				eventRendered={props => {
 					const eventType = props.data.EventType;
 
