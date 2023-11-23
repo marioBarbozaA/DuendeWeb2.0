@@ -2,7 +2,7 @@ const { getInstance: getSingleton } = require('./Singleton.js');
 const SingletonDAO = getSingleton();
 const Sale = require('../models/Sales.js');
 const NotificationManager = require('../models/observer/NotificationManager.js');
-
+const { newSaleObserver } = require('../models/observer/Observer.js');
 
 const newSale = async (req, res) => {
     console.log('Sale controller...');
@@ -68,11 +68,11 @@ const newSale = async (req, res) => {
       // Create a new notification manager
       const notificationManager = new NotificationManager();
 
-      const newSaleObserver = new newSaleObserver();
+      const saleObserver = new newSaleObserver();
 
-      notificationManager.subscribe(newSaleObserver);
+      notificationManager.subscribe('Sale',saleObserver);
 
-      notificationManager.notify(newSale);
+      notificationManager.notify('Sale',newSale);
   
       // Send the response to the frontend
       res.status(201).json(newSale);
