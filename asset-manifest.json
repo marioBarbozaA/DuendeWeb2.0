@@ -1,0 +1,21 @@
+{
+  "files": {
+    "main.css": "/DuendeWeb2.0/static/css/main.682622a0.css",
+    "main.js": "/DuendeWeb2.0/static/js/main.eca17199.js",
+    "static/js/787.2132b845.chunk.js": "/DuendeWeb2.0/static/js/787.2132b845.chunk.js",
+    "static/media/Acerca-de-nosotros.png": "/DuendeWeb2.0/static/media/Acerca-de-nosotros.a0efa1144ed35765f111.png",
+    "static/media/Fondo-Login.png": "/DuendeWeb2.0/static/media/Fondo-Login.c958755da7204c480410.png",
+    "static/media/Aretes.png": "/DuendeWeb2.0/static/media/Aretes.6935a055fa064c6b11c2.png",
+    "static/media/antifaz.jpg": "/DuendeWeb2.0/static/media/antifaz.ca979f56a5d50cf7f143.jpg",
+    "static/media/make-up.png": "/DuendeWeb2.0/static/media/make-up.bf5f3f54d85135ba6aec.png",
+    "static/media/Logo-Duende.png": "/DuendeWeb2.0/static/media/Logo-Duende.d7859b1da37ae5dac67c.png",
+    "index.html": "/DuendeWeb2.0/index.html",
+    "main.682622a0.css.map": "/DuendeWeb2.0/static/css/main.682622a0.css.map",
+    "main.eca17199.js.map": "/DuendeWeb2.0/static/js/main.eca17199.js.map",
+    "787.2132b845.chunk.js.map": "/DuendeWeb2.0/static/js/787.2132b845.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.682622a0.css",
+    "static/js/main.eca17199.js"
+  ]
+}
