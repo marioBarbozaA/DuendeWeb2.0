@@ -25,6 +25,7 @@ class NotificationManager {
     }
   
     subscribe(eventType, observer) {
+      console.log('Subscribing to event type:', eventType);
       if (!this.observers[eventType]) {
         this.observers[eventType] = [];
       }
@@ -38,6 +39,7 @@ class NotificationManager {
     }
   
     notify(eventType, data) {
+      console.log('Notifying event type:', eventType);
       if (this.observers[eventType]) {
         this.observers[eventType].forEach(observer => observer.update(data));
       }

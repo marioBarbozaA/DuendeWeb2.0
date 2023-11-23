@@ -936,7 +936,7 @@ class Singleton {
 
   async getAllProductsActive(req, res, next) {
     try {
-      const products = await Product.find({ $or: [{ status: "active" }, { status: "disponible" }] });
+      const products = await Product.find({ $or: [{ status: "active" }, { status: "disponible" }, { status: "true" }] });
       res.status(200).json(products);
     } catch (error) {
       res.status(500).json({ msg: 'Server error' + error });
@@ -1245,16 +1245,19 @@ class Singleton {
   /////////////////////////////////////
   ////////////  Notification  //////////////
   /////////////////////////////////////
-  async createNotification(notificationData) {
+  async createNotification(notificationDataArray) {
     try {
-      const notification = await NotificationModel.create(notificationData);
-      console.log('Notificación creada:', notification);
-      return notification;
+        // Check if the input is an array; if not, wrap it in an array
+        const notificationsArray = Array.isArray(notificationDataArray) ? notificationDataArray : [notificationDataArray];
+        const notifications = await NotificationModel.insertMany(notificationsArray);
+        console.log('Notifications created:', notifications);
+        return notifications;
     } catch (error) {
-      console.error('Error al crear la notificación:', error);
-      throw error;
+        console.error('Error creating notifications:', error.message, error.errors);
+        throw error;
     }
-  }
+}
+
 
   async getAllNotifications() {
     try {
