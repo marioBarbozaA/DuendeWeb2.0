@@ -1,3 +1,4 @@
+// appointmentModel.js
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
@@ -8,14 +9,6 @@ const appointmentSchema = new Schema({
     EndTime: Date,
     Details: String,
     status: String,
-    
-    // Campos específicos para Cita
-    CustomerName: String,
-    ReferenceService: String,
-    // Campos específicos para Entrega
-    OrderNumber: String,
-    DeliveryCustomerName: String,
 });
 
-const Appointment = mongoose.model('Appointment', appointmentSchema);
-module.exports = { Appointment };
+module.exports = mongoose.model('Appointment', appointmentSchema);
