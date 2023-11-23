@@ -214,39 +214,50 @@ class Singleton {
   //                                Appointment Functions
   //-------------------------------------------------------------------------------------
   // Método para crear un nuevo evento en la base de datos
-async createAppointment(req, res, next) {
-  try {
-      const jsonAppointment = req.body;
+  async createAppointment(req, res, next) {
+    try {
+        const jsonAppointment = req.body;
+        let decoratedAppointment; 
 
-      // Crear una nueva instancia del modelo de Appointment
-      const decoratedAppointment = new Appointment({
-          Subject: jsonAppointment.Subject,
-          EventType: jsonAppointment.EventType,
-          StartTime: jsonAppointment.StartTime,
-          EndTime: jsonAppointment.EndTime,
-          Details: jsonAppointment.Details,
-          status: jsonAppointment.status,
-      });
+        // Crear una nueva instancia del modelo de acuerdo con el tipo de evento
+        if (jsonAppointment.EventType === 'Entrega') {
+            console.log("Entrega:",jsonAppointment);
+            decoratedAppointment = new EntregaDecorator({
+                Subject: jsonAppointment.Subject,
+                EventType: jsonAppointment.EventType,
+                StartTime: jsonAppointment.StartTime,
+                EndTime: jsonAppointment.EndTime,
+                Details: jsonAppointment.Details,
+                status: jsonAppointment.status,
+                OrderNumber: jsonAppointment.OrderNumber,
+                DeliveryCustomerName: jsonAppointment.DeliveryCustomerName,
+                
+            });
+            console.log("decoratedAppointment",decoratedAppointment);
+        } else if (jsonAppointment.EventType === 'Cita') {
+          console.log("Cita:",jsonAppointment);
+          decoratedAppointment = new CitaDecorator({
+                Subject: jsonAppointment.Subject,
+                EventType: jsonAppointment.EventType,
+                StartTime: jsonAppointment.StartTime,
+                EndTime: jsonAppointment.EndTime,
+                Details: jsonAppointment.Details,
+                status: jsonAppointment.status,
+                CustomerName: jsonAppointment.CustomerName,
+                ReferenceService: jsonAppointment.ReferenceService,
+                // Otros campos específicos de Cita
+            });
+            console.log("decoratedAppointment",decoratedAppointment);
+        }
 
-      // Asignar campos específicos según el tipo de evento
-      if (jsonAppointment.EventType === 'Entrega') {
-          decoratedAppointment.OrderNumber = jsonAppointment.OrderNumber;
-          decoratedAppointment.DeliveryCustomerName = jsonAppointment.DeliveryCustomerName;
-          // Asignar otros campos específicos de Entrega
-      } else if (jsonAppointment.EventType === 'Cita') {
-          decoratedAppointment.CustomerName = jsonAppointment.CustomerName;
-          decoratedAppointment.ReferenceService = jsonAppointment.ReferenceService;
-          // Asignar otros campos específicos de Cita
-      }
+        // Guardar el nuevo evento en la base de datos
+        await decoratedAppointment.save();
 
-      // Guardar el nuevo evento en la base de datos
-      await decoratedAppointment.save();
-
-      res.status(201).json({ state: true, message: 'El compromiso se ha creado exitosamente' });
-  } catch (error) {
-      res.status(500).json({ message: `Error del servidor: ${error}` });
-  }
-  next();
+        res.status(201).json({ state: true, message: 'El compromiso se ha creado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ message: `Error del servidor: ${error}` });
+    }
+    next();
 }
 
 
@@ -255,39 +266,45 @@ async updateAppointment(req, res, next) {
       const jsonAppointment = req.body;
       const appointmentId = jsonAppointment._id;
 
-      // Buscar el evento en la base de datos
-      const decoratedAppointment = await Appointment.findOne({ _id: appointmentId });
+      const appointmentFound = await Appointment.findOne({ _id: appointmentId });
 
-      if (!decoratedAppointment) {
+      if (!appointmentFound) {
           return res.status(404).json({ message: 'El compromiso no se encuentra' });
       }
 
-      // Actualizar campos comunes
-      decoratedAppointment.Subject = jsonAppointment.Subject;
-      decoratedAppointment.EventType = jsonAppointment.EventType;
-      decoratedAppointment.StartTime = jsonAppointment.StartTime;
-      decoratedAppointment.EndTime = jsonAppointment.EndTime;
-      decoratedAppointment.Details = jsonAppointment.Details;
-      decoratedAppointment.status = jsonAppointment.status;
+      const updateFields = {
+          Subject: jsonAppointment.Subject,
+          EventType: jsonAppointment.EventType,
+          StartTime: jsonAppointment.StartTime,
+          EndTime: jsonAppointment.EndTime,
+          Details: jsonAppointment.Details,
+          status: jsonAppointment.status,
+      };
 
       // Actualizar campos específicos según el tipo de evento
       if (jsonAppointment.EventType === 'Entrega') {
-          decoratedAppointment.setOrderNumber(jsonAppointment.OrderNumber);
-          decoratedAppointment.setDeliveryCustomerName(jsonAppointment.DeliveryCustomerName);
+          updateFields.OrderNumber = jsonAppointment.OrderNumber;
+          updateFields.DeliveryCustomerName = jsonAppointment.DeliveryCustomerName;
+          // Otros campos específicos de Entrega si es necesario
       } else if (jsonAppointment.EventType === 'Cita') {
-          decoratedAppointment.setCustomerName(jsonAppointment.CustomerName);
-          decoratedAppointment.setReferenceService(jsonAppointment.ReferenceService);
+          updateFields.CustomerName = jsonAppointment.CustomerName;
+          updateFields.ReferenceService = jsonAppointment.ReferenceService;
+          // Otros campos específicos de Cita si es necesario
       }
 
-      // Guardar la actualización en la base de datos
-      await decoratedAppointment.save();
+      // Actualizar el compromiso en la base de datos
+      await Appointment.updateOne({ _id: appointmentId }, { $set: updateFields });
 
-      res.status(200).json({ state: true, message: 'El compromiso se ha modificado exitosamente' });
+      res.status(200).json({
+          state: true,
+          message: 'El compromiso se ha modificado exitosamente',
+      });
   } catch (error) {
       res.status(500).json({ message: `Error del servidor: ${error}` });
   }
   next();
 }
+
 
 
 
@@ -792,118 +809,7 @@ async checkTimeCollisions(newAppointment, existingAppointmentId = null) {
         next();
     }
     
-    //-------------------------------------------------------------------------------------
-    //                                Appointment Functions
-    //-------------------------------------------------------------------------------------
-    async createAppointment(req, res, next) {
-        try {
-            const jsonAppointment = req.body;
-            await Appointment.create({
-                "participants": jsonAppointment.participants,
-                "type": jsonAppointment.type,
-                "details": jsonAppointment.details,
-                "date": jsonAppointment.date,
-                "image": jsonAppointment.image,
-                "status": jsonAppointment.status,
-                "startingTime": jsonAppointment.startingTime,
-                "endingTime": jsonAppointment.endingTime,
-                "orderNumber": jsonAppointment.orderNumber
-            });
     
-            res.status(201).json({ state: true, message: 'El compromiso se ha creado exitosamente' });
-        } catch (error) {
-            res.status(500).json({ message: `Error del servidor: ${error}` });
-        }
-        next();
-    }
-
-    async updateAppointment(req, res, next) {
-        try {
-            const jsonAppointment = req.body;
-            const appointmentId = jsonAppointment._id; 
-    
-            
-            const appointmentFound = await Appointment.findOne({ _id: appointmentId });
-    
-            if (!appointmentFound) {
-                return res.status(404).json({ message: 'El compromiso no se encuentra' });
-            }
-    
-            
-            const updateFields = {
-                "participants": jsonAppointment.participants,
-                "type": jsonAppointment.type,
-                "details": jsonAppointment.details,
-                "date": jsonAppointment.date,
-                "image": jsonAppointment.image,
-                "status": jsonAppointment.status,
-                "startingTime": jsonAppointment.startingTime,
-                "endingTime": jsonAppointment.endingTime,
-                "orderNumber": jsonAppointment.orderNumber
-            };
-    
-            // Actualizar el compromiso en la base de datos
-            await Appointment.updateOne({ _id: appointmentId }, { $set: updateFields });
-    
-            res.status(200).json({ state: true, message: 'El compromiso se ha modificado exitosamente' });
-        } catch (error) {
-            res.status(500).json({ message: `Error del servidor: ${error}` });
-        }
-        next();
-    }
-
-    async deleteAppointment(req, res, next) {
-        try {
-            const jsonAppointment = req.body;
-            const appointmentId = jsonAppointment._id; 
-
-            const appointmentFound = await Appointment.findOne({ _id: appointmentId });
-    
-            if (!appointmentFound) {
-                return res.status(404).json({ message: 'El compromiso no se encuentra' });
-            }
-    
-            await Appointment.deleteOne({ _id: jsonAppointment._id });
-    
-            res.status(200).json({ state: true, message: 'El compromiso se ha eliminado exitosamente' });
-        } catch (error) {
-            res.status(500).json({ message: `Error del servidor: ${error}` });
-        }
-        next();
-    }
-    
-    async getAppointmentById(req, res, next) {
-        try {
-            const appointmentId = req.params.appointmentId; // Obtener el ID del compromiso de los parámetros de la URL
-            const appointment = await Appointment.findOne({ _id: appointmentId });
-    
-            if (!appointment) {
-                return res.status(404).json({ message: 'El compromiso no se encuentra' });
-            }
-    
-            res.status(200).json(appointment);
-        } catch (error) {
-            res.status(500).json({ message: `Error del servidor: ${error}` });
-        }
-        next();
-    }
-    
-    async getAllAppointments(req, res, next) {
-        try {
-            const appointments = await Appointment.find({});
-    
-            if (appointments.length === 0) {
-                return res.status(404).json({ message: 'No se encontraron compromisos en la agenda' });
-            }
-    
-            res.status(200).json(appointments);
-        } catch (error) {
-            res.status(500).json({ message: `Error del servidor: ${error}` });
-        }
-        next();
-    }
-    
-
     //-------------------------------------------------------------------------------------
     //                                
     //-------------------------------------------------------------------------------------
