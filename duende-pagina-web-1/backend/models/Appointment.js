@@ -8,6 +8,14 @@ const appointmentSchema = new Schema({
     EndTime: Date,
     Details: String,
     status: String,
+    
+    // Campos específicos para Cita
+    CustomerName: String,
+    ReferenceService: String,
+    // Campos específicos para Entrega
+    OrderNumber: String,
+    DeliveryCustomerName: String,
 });
 
-module.exports = mongoose.model('Appointment', appointmentSchema);
+const Appointment = mongoose.model('Appointment', appointmentSchema);
+module.exports = { Appointment };

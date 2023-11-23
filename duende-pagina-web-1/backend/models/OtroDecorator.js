@@ -21,4 +21,4 @@ class Curso extends Appointment {
     }
 }
 
-module.exports = mongoose.model('Curso', cursoSchema);
+module.exports = Appointment.discriminator('Curso', entregaSchema);

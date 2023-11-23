@@ -48,7 +48,7 @@ const Scheduler = () => {
 			EndTime: new Date(2023, 10, 17, 7, 0),
 			Details: 'Chepe Centro',
 			CustomerName: 'Naho',
-			ReferenceImage: '/Naho',
+			ReferenceService: '/Naho',
 			OrderNumber: '12',
 			DeliveryCustomerName: 'Naho bo',
 		},
@@ -60,7 +60,7 @@ const Scheduler = () => {
 			EndTime: new Date(2023, 10, 16, 7, 0),
 			Details: 'Chepe Centro',
 			CustomerName: 'Juan',
-			ReferenceImage: '/mario',
+			ReferenceService: '/mario',
 			OrderNumber: '123',
 			DeliveryCustomerName: 'Marioneta',
 		},
@@ -83,7 +83,7 @@ const Scheduler = () => {
 		startTime: { name: 'StartTime', validation: { required: true } },
 		endTime: { name: 'EndTime', validation: { required: true } },
 		CustomerName: { name: 'CustomerName' },
-		ReferenceImage: { name: 'ReferenceImage' },
+		ReferenceService: { name: 'ReferenceService' },
 		OrderNumber: { name: 'OrderNumber' },
 		DeliveryCustomerName: { name: 'DeliveryCustomerName' },
 	};
@@ -154,8 +154,8 @@ const Scheduler = () => {
 						<td className='e-textlabel'>Imagen de Referencia</td>
 						<td>
 							<input
-								id='ReferenceImage'
-								name='ReferenceImage'
+								id='ReferenceService'
+								name='ReferenceService'
 								type='text' // Puedes cambiar esto según tus necesidades
 								className='e-field e-input'
 							/>

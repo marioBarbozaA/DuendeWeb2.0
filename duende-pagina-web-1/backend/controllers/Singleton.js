@@ -235,7 +235,7 @@ class Singleton {
                 decoratedAppointment = new Entrega(jsonAppointment);
                 decoratedAppointment.setDeliveryDetails('Detalles de la entrega');
                 decoratedAppointment.setClient(jsonAppointment.client);
-                break;
+                break; 
             default:
                 decoratedAppointment = new Appointment(jsonAppointment);
         }
