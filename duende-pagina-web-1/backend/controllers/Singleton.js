@@ -3,16 +3,15 @@ const bcrypt = require("bcrypt");
 
 const User = require("../models/auth/user.js");
 const Usertype = require("../models/auth/usertype.js");
-//const Appointment = require("../models/appointment.js");
-const CursoDecorator = require('./CursoDecorator');
-const ServicioDecorator = require('./ServicioDecorator');
-const EntregaDecorator = require('./EntregaDecorator');
+const Appointment = require("../models/Appointment.js");
 const Product = require("../models/Product.js");
 const Message = require("../models/Message.js");
 const ShoppingCart = require("../models/ShoppingCart.js");
 const Gallery = require("../models/GalleryImage.js");
 const Sale = require("../models/Sales.js");
 
+const CitaDecorator = require('../models/CitaDecorator');
+const EntregaDecorator = require('../models/EntregaDecorator');
 
 const { createAccessToken } = require("../libs/jwt.js");
 const { TOKEN_SECRET } = require("../config/config.js");
