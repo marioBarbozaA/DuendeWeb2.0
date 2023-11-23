@@ -2,22 +2,23 @@ const mongoose = require('mongoose');
 const Appointment = require('./Appointment');
 
 const entregaSchema = new mongoose.Schema({
-    client: String,
+    OrderNumber: String,
+    DeliveryCustomerName: String,
     // Otros campos específicos de Entrega
 });
 
 class Entrega extends Appointment {
     constructor(data) {
         super(data);
-        this.type = 'Entrega';  // Establecer el tipo del evento
+        this.EventType = 'Entrega';  // Establecer el tipo del evento
     }
 
-    setDeliveryDetails(details) {
-        this.details = details;
+    setOrderNumber(OrderNumber) {
+        this.OrderNumber = OrderNumber;
     }
 
-    setClient(client) {
-        this.client = client;
+    setDeliveryCustomerName(DeliveryCustomerName) {
+        this.DeliveryCustomerName = DeliveryCustomerName;
     }
 }
 

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Appointment = require('./Appointment');
 
-const servicioSchema = new mongoose.Schema({
+const citaSchema = new mongoose.Schema({
     CustomerName: String,
     ReferenceService: String,
 
@@ -10,7 +10,7 @@ const servicioSchema = new mongoose.Schema({
 class Cita extends Appointment {
     constructor(data) {
         super(data);
-        this.type = 'Cita';  // Establecer el tipo del evento
+        this.EventType = 'Cita';  // Establecer el tipo del evento
     }
 
     setCustomerName(CustomerName) {
@@ -23,4 +23,4 @@ class Cita extends Appointment {
 
 }
 
-module.exports = Appointment.discriminator('Cita', entregaSchema);
+module.exports = Appointment.discriminator('Cita', citaSchema);
