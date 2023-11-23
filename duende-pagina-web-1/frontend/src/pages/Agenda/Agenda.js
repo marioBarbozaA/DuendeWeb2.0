@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import NavBar from '../../Components/NavBar/NavBar';
 import Logo from '../../Imagenes/Logo-Duende.png';
 import './Agenda.css';
@@ -19,6 +19,7 @@ import { DropDownListComponent } from '@syncfusion/ej2-react-dropdowns';
 import { DateTimePickerComponent } from '@syncfusion/ej2-react-calendars';
 import { registerLicense } from '@syncfusion/ej2-base';
 import { L10n } from '@syncfusion/ej2-base';
+import axios from 'axios';
 
 registerLicense(
 	'Ngo9BigBOggjHTQxAR8/V1NHaF5cWWdCf1FpRGRGfV5yd0VHYlZQRHxeSk0SNHVRdkdgWH5fd3RVR2FYVkx2Vko=',
@@ -34,37 +35,28 @@ L10n.load({
 		},
 	},
 });
+
+
 const Scheduler = () => {
+	const scheduleObj = useRef(null);
 	// create const use state event type and setEventType
 
 	const [eventTypes, setEventTypes] = useState({});
 
-	const [localData, setLocalData] = useState([
-		{
-			Id: 1,
-			Subject: 'plug de tierrosa',
-			EventType: 'Entrega',
-			StartTime: new Date(2023, 10, 17, 6, 0),
-			EndTime: new Date(2023, 10, 17, 7, 0),
-			Details: 'Chepe Centro',
-			CustomerName: 'Naho',
-			ReferenceService: '/Naho',
-			OrderNumber: '12',
-			DeliveryCustomerName: 'Naho bo',
-		},
-		{
-			Id: 2,
-			Subject: 'Maquillaje de Tierrosa',
-			EventType: 'Cita',
-			StartTime: new Date(2023, 10, 16, 6, 0),
-			EndTime: new Date(2023, 10, 16, 7, 0),
-			Details: 'Chepe Centro',
-			CustomerName: 'Juan',
-			ReferenceService: '/mario',
-			OrderNumber: '123',
-			DeliveryCustomerName: 'Marioneta',
-		},
-	]);
+	const [localData, setLocalData] = useState([]);
+
+	useEffect(() => {
+		const fetchData = async () => {
+		  try {
+			const response = await axios.get('http://localhost:3500/appointments/getAll'); 
+			setLocalData(response.data); // Asigna los datos obtenidos a localData
+		  } catch (error) {
+			console.error('Error al obtener datos de la API:', error);
+		  }
+		};
+	
+		fetchData(); // Llama a la función fetchData al montar el componente
+	  }, []); // El segundo argumento del useEffect ([]) asegura que la llamada se realice solo una vez al montar el componente
 
 	// initialize eventTypes with initial event types from localData
 	useEffect(() => {
@@ -74,6 +66,7 @@ const Scheduler = () => {
 		});
 		setEventTypes(initialEventTypes);
 	}, [localData]);
+
 
 	const fieldsData = {
 		id: 'Id',
