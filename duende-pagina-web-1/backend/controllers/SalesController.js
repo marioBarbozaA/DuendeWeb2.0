@@ -1,8 +1,6 @@
 const { getInstance: getSingleton } = require('./Singleton.js');
 const SingletonDAO = getSingleton();
 const Sale = require('../models/Sales.js');
-const NotificationManager = require('../models/observer/NotificationManager.js');
-const { newSaleObserver } = require('../models/observer/Observer.js');
 
 const newSale = async (req, res) => {
   console.log('Sale controller...');
@@ -27,11 +25,43 @@ const newSale = async (req, res) => {
     // Get user's ID
     const userBuyer = req.body.userId; // assuming you have the user's ID in req.user.id
 
-    const saleObserver = new newSaleObserver();
+    // Calculate tax and delivery cost
+    const tax = cost * 0.13;
+    const deliveryCost = 8;
 
-    notificationManager.subscribe('Sale', saleObserver);
+    // Create new sale object
+    const saleData = {
+      orderNum,
+      userBuyer,
+      products: carrito.map(product => ({
+        _id: product._id,
+        name: product.name,
+        price: product.price,
+        quantity: product.quantity,
+      })),
+      location: {
+        provincia,
+        canton,
+        distrito,
+        details,
+      },
+      sinpe: {
+        url: req.body.mainImage,
+        altText: 'Sinpe Image Alt Text',
+      },
+      tax,
+      deliveryCost,
+      total: parseFloat(cost) + tax + deliveryCost,
+      actualBuyerName,
+      actualBuyerPhone,
+      actualBuyerEmail,
+      deliverDate: new Date(new Date().setDate(new Date().getDate() + 3)), // 3 business days after today
+    };
 
-    notificationManager.notify('Sale', newSale);
+    console.log('saleData:', saleData);
+
+    // Call your Singleton method to create a new sale
+    const newSale = await SingletonDAO.createSale(saleData);
 
     // Send the response to the frontend
     res.status(201).json(newSale);
@@ -39,26 +69,6 @@ const newSale = async (req, res) => {
     console.error('Error creating new sale:', error);
     res.status(500).json({ msg: 'Server error' + error });
   }
-};
-
-// Call your Singleton method to create a new sale
-const newSale = await SingletonDAO.createSale(saleData);
-
-// Create a new notification manager
-const notificationManager = new NotificationManager();
-
-const saleObserver = new newSaleObserver();
-
-notificationManager.subscribe(saleObserver);
-
-notificationManager.notify('Sale', newSale);
-
-// Send the response to the frontend
-res.status(201).json(newSale);
-  } catch (error) {
-  console.error('Error creating new sale:', error);
-  res.status(500).json({ msg: 'Server error' + error });
-}
 };
 
 const userHistory = async (req, res) => {
