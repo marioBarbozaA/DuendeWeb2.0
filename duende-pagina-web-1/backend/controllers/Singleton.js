@@ -1231,7 +1231,7 @@ class Singleton {
         for (const product of sale.products) {
           console.log("Singleton updateSale product:", product);
           this.updateInventory(product._id, product.quantity);
-          salesObservable.notify("Aceptado");
+
         }
       }
 
@@ -1247,16 +1247,16 @@ class Singleton {
   /////////////////////////////////////
   async createNotification(notificationDataArray) {
     try {
-        // Check if the input is an array; if not, wrap it in an array
-        const notificationsArray = Array.isArray(notificationDataArray) ? notificationDataArray : [notificationDataArray];
-        const notifications = await NotificationModel.insertMany(notificationsArray);
-        console.log('Notifications created:', notifications);
-        return notifications;
+      // Check if the input is an array; if not, wrap it in an array
+      const notificationsArray = Array.isArray(notificationDataArray) ? notificationDataArray : [notificationDataArray];
+      const notifications = await NotificationModel.insertMany(notificationsArray);
+      console.log('Notifications created:', notifications);
+      return notifications;
     } catch (error) {
-        console.error('Error creating notifications:', error.message, error.errors);
-        throw error;
+      console.error('Error creating notifications:', error.message, error.errors);
+      throw error;
     }
-}
+  }
 
 
   async getAllNotifications() {
@@ -1274,7 +1274,7 @@ class Singleton {
       console.log('getUserNotifications singleton:', req.params.userId);
       const notifications = await NotificationModel.find({ user: req.params.userId });
       console.log('Notificaciones del usuario:', notifications);
-      return notifications; 
+      return notifications;
     } catch (error) {
       console.error('Error al obtener las notificaciones del usuario:', error);
       throw error;

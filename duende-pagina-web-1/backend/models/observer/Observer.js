@@ -19,14 +19,7 @@ class newSaleObserver extends Observer {
         console.log('userBuyerId:', userBuyerId);
         console.log('adminId:', adminId);
         const notifications = [
-            {
-                user: adminId, // Admin user ID
-                title: "New Sale",
-                description: "A new sale has been made",
-                date: new Date(),
-                type: "New Order",
-                state: "Active",
-            },
+
             {
                 user: userBuyerId,
                 title: "Purchase Completed",
@@ -49,35 +42,33 @@ class newSaleObserver extends Observer {
 
 class updateSaleObserver extends Observer {
     async update(message) {
-        console.log(`SaleObserver update: ${message}`);
-        //Admin Message
-        const notificationDataAdmin = {
-            user: "6539c5111b8018f186929836",
-            title: "New Sale",
-            description: "A new sale has been made",
+        if (!message.userBuyer || !message.approvalStatus) {
+            console.error('userBuyer or approvalStatus is undefined in the message object');
+            return;
+        }
+
+        const userBuyerId = message.userBuyer.toString();
+        const approvalStatus = message.approvalStatus;
+
+        const notification = {
+            user: userBuyerId,
+            title: approvalStatus === 'approved' ? 'Venta Aprobada' : 'Venta Rechazada',
+            description: approvalStatus === 'approved' ? 'Tu venta ha sido aprobada. ¡Gracias por tu compra!' : 'Lamentablemente, tu venta ha sido rechazada.',
             date: new Date(),
-            type: "New Order",
-            state: "Active",
-        };
-        //Cliente Message
-        const notificationDataClient = {
-            user: message.userBuyer,
-            title: "Purchase Completed",
-            description: "Your sale was made successfully",
-            date: new Date(),
-            type: "Confirm Purchase",
-            state: "Active",
+            type: approvalStatus === 'approved' ? 'Venta Aprobada' : 'Venta Rechazada',
+            state: 'Active',
         };
 
+        console.log('Notification to be created:', notification);
+
         try {
-            const notificationC = await SingletonDAO.createNotification(notificationDataClient);
-            const notificationA = await SingletonDAO.createNotification(notificationDataAdmin);
-            res.status(201).json(notificationC);
+            await SingletonDAO.createNotification([notification]);
+            console.log('Notification created successfully');
         } catch (error) {
-            console.error(error);
-            res.status(500).json({ msg: 'Server error' + error });
+            console.error('Error creating notification:', error);
         }
     }
+
 }
 
 class newAppointmentObserver extends Observer {

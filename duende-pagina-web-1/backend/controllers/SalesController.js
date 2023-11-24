@@ -3,6 +3,7 @@ const SingletonDAO = getSingleton();
 const Sale = require('../models/Sales.js');
 const NotificationManager = require('../models/observer/NotificationManager.js');
 const { newSaleObserver } = require('../models/observer/Observer.js');
+const { updateSaleObserver } = require('../models/observer/Observer.js');
 
 const newSale = async (req, res) => {
   console.log('Sale controller...');
@@ -109,6 +110,14 @@ const updateSale = async (req, res) => {
   try {
     console.log('Update sale controller...');
     const updatedSale = await SingletonDAO.updateSale(req.params.id, req.body);
+
+    const notificationManager = new NotificationManager();
+    const { status, userBuyer } = req.body;
+    const updateObserver = new updateSaleObserver();
+
+    notificationManager.subscribe('update', updateObserver);
+
+    notificationManager.notify('update', { status, userBuyer });
     res.status(200).json(updatedSale);
   } catch (error) {
     console.error('Error updating sale:', error);
