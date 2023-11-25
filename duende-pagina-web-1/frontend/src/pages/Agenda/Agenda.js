@@ -39,42 +39,31 @@ L10n.load({
 
 const Scheduler = () => {
 	const [eventTypes, setEventTypes] = useState({});
-
+	const [shouldFetchData, setShouldFetchData] = useState(true);
 	const [localData, setLocalData] = useState([]);
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const response = await axios.get(
-					'http://localhost:3500/appointments/getAll',
+	const fetchData = async () => {
+		try {
+			const response = await axios.get(
+				'http://localhost:3500/appointments/getAll',
+			);
+			if (Array.isArray(response.data)) {
+				setLocalData(response.data);
+			} else {
+				console.error(
+					'La respuesta de la API no es un arreglo:',
+					response.data,
 				);
-				console.log('Datos recibidos de la API:', response.data);
-				if (Array.isArray(response.data)) {
-					// Asegúrate de que la estructura de los datos coincida con lo que espera el componente
-					const formattedData = response.data.map(item => {
-						// Transforma los datos aquí si es necesario
-						return item;
-					});
-					setLocalData(formattedData);
-				} else {
-					console.error(
-						'La respuesta de la API no es un arreglo:',
-						response.data,
-					);
-				}
-			} catch (error) {
-				console.error('Error al obtener datos de la API:', error);
 			}
-		};
-
-		fetchData();
-	}, []);
+		} catch (error) {
+			console.error('Error al obtener datos de la API:', error);
+		}
+	};
 	useEffect(() => {
-		const initialEventTypes = {};
-		localData.forEach(event => {
-			initialEventTypes[event.Id] = event.EventType || 'Otro';
-		});
-		setEventTypes(initialEventTypes);
-	}, [localData]);
+		if (shouldFetchData) {
+			fetchData();
+			setShouldFetchData(false); // Resetear el estado después de la carga de datos
+		}
+	}, [shouldFetchData]);
 
 	const fieldsData = {
 		id: 'Id',
@@ -102,6 +91,7 @@ const Scheduler = () => {
 		if (
 			!['eventCreate', 'eventChange', 'eventRemove'].includes(args.requestType)
 		) {
+			setShouldFetchData(true);
 			return;
 		}
 		const eventData =
@@ -109,6 +99,7 @@ const Scheduler = () => {
 
 		if (!eventData) {
 			console.error('No se encontraron datos de evento.');
+			setShouldFetchData(true);
 			return;
 		}
 		console.log('EventData:', eventData);
@@ -130,18 +121,7 @@ const Scheduler = () => {
 				});
 
 				console.log('API response for save', response); // Para depuración
-
-				setLocalData(prevData => {
-					if (isUpdate) {
-						return prevData.map(event =>
-							event.Id === eventData.Id
-								? { ...event, ...response.data }
-								: event,
-						);
-					} else {
-						return [...prevData, response.data];
-					}
-				});
+				setShouldFetchData(true);
 			} catch (error) {
 				console.error('Error al guardar los datos del evento:', error);
 				console.log('Error data', error.response || error.message);
@@ -166,9 +146,7 @@ const Scheduler = () => {
 
 				console.log('API response for delete', response); // Para depuración
 
-				setLocalData(prevData =>
-					prevData.filter(event => event._id !== eventId),
-				);
+				setShouldFetchData(true);
 			} catch (error) {
 				console.error('Error al eliminar el evento:', error);
 				console.log('Error data', error.response || error.message); // Para depuración
