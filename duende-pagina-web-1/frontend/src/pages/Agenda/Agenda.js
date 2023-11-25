@@ -25,8 +25,6 @@ registerLicense(
 	'Ngo9BigBOggjHTQxAR8/V1NHaF5cWWdCf1FpRGRGfV5yd0VHYlZQRHxeSk0SNHVRdkdgWH5fd3RVR2FYVkx2Vko=',
 );
 
-
-
 const Scheduler = () => {
 	const [eventTypes, setEventTypes] = useState({});
 
@@ -120,18 +118,6 @@ const Scheduler = () => {
 				});
 
 				console.log('API response for save', response); // Para depuración
-
-				setLocalData(prevData => {
-					if (isUpdate) {
-						return prevData.map(event =>
-							event.Id === eventData.Id
-								? { ...event, ...response.data }
-								: event,
-						);
-					} else {
-						return [...prevData, response.data];
-					}
-				});
 			} catch (error) {
 				console.error('Error al guardar los datos del evento:', error);
 				console.log('Error data', error.response || error.message);
@@ -155,10 +141,6 @@ const Scheduler = () => {
 				);
 
 				console.log('API response for delete', response); // Para depuración
-
-				setLocalData(prevData =>
-					prevData.filter(event => event._id !== eventId),
-				);
 			} catch (error) {
 				console.error('Error al eliminar el evento:', error);
 				console.log('Error data', error.response || error.message); // Para depuración
@@ -481,8 +463,8 @@ const Scheduler = () => {
 					eventTypes[props.Id] === 'Cita'
 						? Cita(props)
 						: eventTypes[props.Id] === 'Entrega'
-							? Entrega(props)
-							: Otra(props)
+						? Entrega(props)
+						: Otra(props)
 				}
 				eventRendered={props => {
 					const eventType = props.data.EventType;
