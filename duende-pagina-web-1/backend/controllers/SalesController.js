@@ -110,6 +110,7 @@ const updateSale = async (req, res) => {
   try {
     console.log('Update sale controller...');
     const updatedSale = await SingletonDAO.updateSale(req.params.id, req.body);
+
     console.log("***********************************************************");
 
     console.log("reqq", req.body);
