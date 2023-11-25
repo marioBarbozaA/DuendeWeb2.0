@@ -17,6 +17,7 @@ import {
 } from '@syncfusion/ej2-react-schedule';
 import { DropDownListComponent } from '@syncfusion/ej2-react-dropdowns';
 import { DateTimePickerComponent } from '@syncfusion/ej2-react-calendars';
+
 import { registerLicense } from '@syncfusion/ej2-base';
 import { L10n } from '@syncfusion/ej2-base';
 import axios from 'axios';
@@ -40,7 +41,61 @@ L10n.load({
 const Scheduler = () => {
 	const scheduleObj = useRef(null);
 	// create const use state event type and setEventType
+	  // Función para manejar el inicio de una acción
+	  // Función para manejar la acción de guardar y eliminar
+  // Función para manejar la acción de guardar y eliminar
+  const handleActionBegin = async (args) => {
+    console.log('Action Begin Event', args); // Para depuración
 
+    if (args.requestType === "eventCreate"  args.requestType === "eventChange") {
+      args.cancel = true; // Cancela la acción predeterminada de Syncfusion
+      const eventData = args.data instanceof Array ? args.data[0] : args.data;
+
+      // Determina si es un nuevo evento o una actualización
+      const isUpdate = eventData.Id != null;
+      const apiEndpoint = isUpdate ? '/update' : '/create';
+
+      try {
+        const response = await axios({
+          method: isUpdate ? 'put' : 'post',
+          url: `http://localhost:3500${apiEndpoint}`,
+          data: eventData,
+        });
+
+        console.log('API response for save', response); // Para depuración
+
+        // Actualiza el estado local dependiendo de si es una creación o actualización
+        if (isUpdate) {
+          setLocalData(localData.map(event => event.Id === eventData.Id ? response.data : event));
+        } else {
+          setLocalData([...localData, response.data]);
+        }
+      } catch (error) {
+        console.error('Error al guardar los datos del evento:', error);
+        console.log('Error data', error.response || error.message); // Para depuración
+      }
+    } else if (args.requestType === "eventRemove") {
+      args.cancel = true; // Cancela la acción predeterminada de Syncfusion
+      const eventId = args.data[0].Id;
+
+      try {
+        const response = await axios({
+          method: 'delete',
+          url: http://localhost:3500/delete,
+          data: { id: eventId }, // Asegúrate de que tu API espera un cuerpo con la propiedad id
+        });
+
+        console.log('API response for delete', response); // Para depuración
+
+        // Elimina el evento del estado local
+        setLocalData(localData.filter(event => event.Id !== eventId));
+      } catch (error) {
+        console.error('Error al eliminar el evento:', error);
+        console.log('Error data', error.response || error.message); // Para depuración
+      }
+    }
+  };
+	
 	const [eventTypes, setEventTypes] = useState({});
 
 	const [localData, setLocalData] = useState([]);
@@ -395,7 +450,6 @@ const Scheduler = () => {
 				currentView='Month'
 				eventSettings={{
 					dataSource: localData,
-					//template: this.eventTemplate.bind(this),
 					fields: fieldsData,
 				}}
 				dragStart={onDragStart}
@@ -408,6 +462,8 @@ const Scheduler = () => {
 						? Entrega(props)
 						: Otra(props)
 				}
+				
+
 				eventRendered={props => {
 					const eventType = props.data.EventType;
 
@@ -423,10 +479,13 @@ const Scheduler = () => {
 							color = 'rgba(106, 76, 147, 0.3)'; // Púrpura con menos opacidad
 					}
 
+				
+
 					props.element.style.backgroundColor = color;
 					props.element.style.border = `1px solid ${color.replace('0.3', '1')}`; // Borde con opacidad completa
 					props.element.style.color = 'black';
 				}}
+				actionBegin={handleActionBegin} // Añade el manejador de acción aquí
 			>
 				<ViewsDirective>
 					<ViewDirective
@@ -449,5 +508,7 @@ const Scheduler = () => {
 			</ScheduleComponent>
 		</>
 	);
+
+	
 };
 export default Scheduler;
