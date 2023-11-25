@@ -110,9 +110,15 @@ const updateSale = async (req, res) => {
   try {
     console.log('Update sale controller...');
     const updatedSale = await SingletonDAO.updateSale(req.params.id, req.body);
+    console.log("***********************************************************");
+
+    console.log("reqq", req.body);
+    console.log("************************************************************");
 
     const notificationManager = new NotificationManager();
-    const { status, userBuyer } = req.body;
+    //const { status, userBuyer } = req.body;
+    const userBuyer = req.body.userBuyer;
+    const status = req.body.status;
     const updateObserver = new updateSaleObserver();
 
     notificationManager.subscribe('update', updateObserver);

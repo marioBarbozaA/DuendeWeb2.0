@@ -42,20 +42,20 @@ class newSaleObserver extends Observer {
 
 class updateSaleObserver extends Observer {
     async update(message) {
-        if (!message.userBuyer || !message.approvalStatus) {
+        if (!message.userBuyer || !message.status) {
             console.error('userBuyer or approvalStatus is undefined in the message object');
             return;
         }
 
         const userBuyerId = message.userBuyer.toString();
-        const approvalStatus = message.approvalStatus;
+        const approvalStatus = message.status;
 
         const notification = {
             user: userBuyerId,
-            title: approvalStatus === 'approved' ? 'Venta Aprobada' : 'Venta Rechazada',
-            description: approvalStatus === 'approved' ? 'Tu venta ha sido aprobada. ¡Gracias por tu compra!' : 'Lamentablemente, tu venta ha sido rechazada.',
+            title: approvalStatus === 'Aceptado' ? 'Venta Aprobada' : 'Venta Rechazada',
+            description: approvalStatus === 'Aceptado' ? 'Tu venta ha sido aprobada. ¡Gracias por tu compra!' : 'Lamentablemente, tu venta ha sido rechazada.',
             date: new Date(),
-            type: approvalStatus === 'approved' ? 'Venta Aprobada' : 'Venta Rechazada',
+            type: approvalStatus === 'Aceptado' ? 'Venta Aprobada' : 'Venta Rechazada',
             state: 'Active',
         };
 
@@ -87,4 +87,9 @@ class updateAppointmentObserver extends Observer {
     }
 }
 
-module.exports = { newSaleObserver, updateSaleObserver, newAppointmentObserver, updateAppointmentObserver };
+module.exports = {
+    newSaleObserver,
+    updateSaleObserver,
+    newAppointmentObserver,
+    updateAppointmentObserver
+};
