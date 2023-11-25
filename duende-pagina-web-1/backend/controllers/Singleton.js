@@ -317,7 +317,8 @@ class Singleton {
     try {
       const jsonAppointment = req.body;
       const appointmentId = jsonAppointment._id;
-
+      console.log("BODY:", req.body);
+      console.log("RES:", res);
       const appointmentFound = await Appointment.findOne({
         _id: appointmentId,
       });
