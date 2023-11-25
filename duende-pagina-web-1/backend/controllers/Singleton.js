@@ -10,8 +10,8 @@ const ShoppingCart = require("../models/ShoppingCart.js");
 const Gallery = require("../models/GalleryImage.js");
 const Sale = require("../models/Sales.js");
 
-const CitaDecorator = require('../models/CitaDecorator');
-const EntregaDecorator = require('../models/EntregaDecorator');
+const CitaDecorator = require("../models/CitaDecorator");
+const EntregaDecorator = require("../models/EntregaDecorator");
 
 const { createAccessToken } = require("../libs/jwt.js");
 const { TOKEN_SECRET } = require("../config/config.js");
@@ -216,161 +216,175 @@ class Singleton {
   // Método para crear un nuevo evento en la base de datos
   async createAppointment(req, res, next) {
     try {
-        const jsonAppointment = req.body;
-        let decoratedAppointment; 
-
-        // Crear una nueva instancia del modelo de acuerdo con el tipo de evento
-        if (jsonAppointment.EventType === 'Entrega') {
-            console.log("Entrega:",jsonAppointment);
-            decoratedAppointment = new EntregaDecorator({
-                Subject: jsonAppointment.Subject,
-                EventType: jsonAppointment.EventType,
-                StartTime: jsonAppointment.StartTime,
-                EndTime: jsonAppointment.EndTime,
-                Details: jsonAppointment.Details,
-                status: jsonAppointment.status,
-                OrderNumber: jsonAppointment.OrderNumber,
-                DeliveryCustomerName: jsonAppointment.DeliveryCustomerName,
-                
-            });
-            console.log("decoratedAppointment",decoratedAppointment);
-        } else if (jsonAppointment.EventType === 'Cita') {
-          console.log("Cita:",jsonAppointment);
-          decoratedAppointment = new CitaDecorator({
-                Subject: jsonAppointment.Subject,
-                EventType: jsonAppointment.EventType,
-                StartTime: jsonAppointment.StartTime,
-                EndTime: jsonAppointment.EndTime,
-                Details: jsonAppointment.Details,
-                status: jsonAppointment.status,
-                CustomerName: jsonAppointment.CustomerName,
-                ReferenceService: jsonAppointment.ReferenceService,
-                // Otros campos específicos de Cita
-            });
-            console.log("decoratedAppointment",decoratedAppointment);
-        }
-
-        // Guardar el nuevo evento en la base de datos
-        await decoratedAppointment.save();
-
-        res.status(201).json({ state: true, message: 'El compromiso se ha creado exitosamente' });
-    } catch (error) {
-        res.status(500).json({ message: `Error del servidor: ${error}` });
-    }
-    next();
-}
-
-
-async updateAppointment(req, res, next) {
-  try {
       const jsonAppointment = req.body;
-      const appointmentId = jsonAppointment._id;
+      let decoratedAppointment;
 
-      const appointmentFound = await Appointment.findOne({ _id: appointmentId });
-
-      if (!appointmentFound) {
-          return res.status(404).json({ message: 'El compromiso no se encuentra' });
-      }
-
-      const updateFields = {
+      // Crear una nueva instancia del modelo de acuerdo con el tipo de evento
+      if (jsonAppointment.EventType === "Entrega") {
+        console.log("Entrega:", jsonAppointment);
+        decoratedAppointment = new EntregaDecorator({
           Subject: jsonAppointment.Subject,
           EventType: jsonAppointment.EventType,
           StartTime: jsonAppointment.StartTime,
           EndTime: jsonAppointment.EndTime,
           Details: jsonAppointment.Details,
           status: jsonAppointment.status,
+          OrderNumber: jsonAppointment.OrderNumber,
+          DeliveryCustomerName: jsonAppointment.DeliveryCustomerName,
+        });
+        console.log("decoratedAppointment", decoratedAppointment);
+      } else if (jsonAppointment.EventType === "Cita") {
+        console.log("Cita:", jsonAppointment);
+        decoratedAppointment = new CitaDecorator({
+          Subject: jsonAppointment.Subject,
+          EventType: jsonAppointment.EventType,
+          StartTime: jsonAppointment.StartTime,
+          EndTime: jsonAppointment.EndTime,
+          Details: jsonAppointment.Details,
+          status: jsonAppointment.status,
+          CustomerName: jsonAppointment.CustomerName,
+          ReferenceService: jsonAppointment.ReferenceService,
+          // Otros campos específicos de Cita
+        });
+        console.log("decoratedAppointment", decoratedAppointment);
+      }
+
+      // Guardar el nuevo evento en la base de datos
+      await decoratedAppointment.save();
+
+      res.status(201).json({
+        state: true,
+        message: "El compromiso se ha creado exitosamente",
+      });
+    } catch (error) {
+      res.status(500).json({ message: `Error del servidor: ${error}` });
+    }
+    next();
+  }
+
+  async updateAppointment(req, res, next) {
+    try {
+      const jsonAppointment = req.body;
+      const appointmentId = jsonAppointment._id;
+
+      const appointmentFound = await Appointment.findOne({
+        _id: appointmentId,
+      });
+
+      if (!appointmentFound) {
+        return res
+          .status(404)
+          .json({ message: "El compromiso no se encuentra" });
+      }
+
+      const updateFields = {
+        Subject: jsonAppointment.Subject,
+        EventType: jsonAppointment.EventType,
+        StartTime: jsonAppointment.StartTime,
+        EndTime: jsonAppointment.EndTime,
+        Details: jsonAppointment.Details,
+        status: jsonAppointment.status,
       };
 
       // Actualizar campos específicos según el tipo de evento
-      if (jsonAppointment.EventType === 'Entrega') {
-          updateFields.OrderNumber = jsonAppointment.OrderNumber;
-          updateFields.DeliveryCustomerName = jsonAppointment.DeliveryCustomerName;
-          // Otros campos específicos de Entrega si es necesario
-      } else if (jsonAppointment.EventType === 'Cita') {
-          updateFields.CustomerName = jsonAppointment.CustomerName;
-          updateFields.ReferenceService = jsonAppointment.ReferenceService;
-          // Otros campos específicos de Cita si es necesario
+      if (jsonAppointment.EventType === "Entrega") {
+        updateFields.OrderNumber = jsonAppointment.OrderNumber;
+        updateFields.DeliveryCustomerName =
+          jsonAppointment.DeliveryCustomerName;
+        // Otros campos específicos de Entrega si es necesario
+      } else if (jsonAppointment.EventType === "Cita") {
+        updateFields.CustomerName = jsonAppointment.CustomerName;
+        updateFields.ReferenceService = jsonAppointment.ReferenceService;
+        // Otros campos específicos de Cita si es necesario
       }
 
       // Actualizar el compromiso en la base de datos
-      await Appointment.updateOne({ _id: appointmentId }, { $set: updateFields });
+      await Appointment.updateOne(
+        { _id: appointmentId },
+        { $set: updateFields }
+      );
 
       res.status(200).json({
-          state: true,
-          message: 'El compromiso se ha modificado exitosamente',
+        state: true,
+        message: "El compromiso se ha modificado exitosamente",
       });
-  } catch (error) {
+    } catch (error) {
       res.status(500).json({ message: `Error del servidor: ${error}` });
+    }
+    next();
   }
-  next();
-}
 
-
-
-
-async deleteAppointment(req, res, next) {
+  async deleteAppointment(req, res, next) {
     try {
-        const jsonAppointment = req.body;
-        const appointmentId = jsonAppointment._id;
+      const jsonAppointment = req.body;
+      const appointmentId = jsonAppointment._id;
 
-        const appointmentFound = await Appointment.findOne({ _id: appointmentId });
+      const appointmentFound = await Appointment.findOne({
+        _id: appointmentId,
+      });
 
-        if (!appointmentFound) {
-            return res.status(404).json({ message: 'El compromiso no se encuentra' });
-        }
+      if (!appointmentFound) {
+        return res
+          .status(404)
+          .json({ message: "El compromiso no se encuentra" });
+      }
 
-        await Appointment.deleteOne({ _id: jsonAppointment._id });
+      await Appointment.deleteOne({ _id: jsonAppointment._id });
 
-        res.status(200).json({ state: true, message: 'El compromiso se ha eliminado exitosamente' });
+      res.status(200).json({
+        state: true,
+        message: "El compromiso se ha eliminado exitosamente",
+      });
     } catch (error) {
-        res.status(500).json({ message: `Error del servidor: ${error}` });
+      res.status(500).json({ message: `Error del servidor: ${error}` });
     }
     next();
-}
+  }
 
-async getAllAppointments(req, res, next) {
+  async getAllAppointments(req, res, next) {
     try {
-        const appointments = await Appointment.find({});
+      const appointments = await Appointment.find({});
 
-        if (appointments.length === 0) {
-            return res.status(404).json({ message: 'No se encontraron compromisos en la agenda' });
-        }
+      if (appointments.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "No se encontraron compromisos en la agenda" });
+      }
 
-        res.status(200).json(appointments);
+      res.status(200).json(appointments);
     } catch (error) {
-        res.status(500).json({ message: `Error del servidor: ${error}` });
+      res.status(500).json({ message: `Error del servidor: ${error}` });
     }
     next();
-}
+  }
 
-async checkTimeCollisions(newAppointment, existingAppointmentId = null) {
-  const collidesWith = await Appointment.find({
-      _id: { $ne: existingAppointmentId },  // Excluir el evento existente al editar
+  async checkTimeCollisions(newAppointment, existingAppointmentId = null) {
+    const collidesWith = await Appointment.find({
+      _id: { $ne: existingAppointmentId }, // Excluir el evento existente al editar
       $or: [
-          {
-              $and: [
-                  { StartTime: { $lt: newAppointment.EndTime } },
-                  { EndTime: { $gt: newAppointment.StartTime } },
-              ],
-          },
-          {
-              $and: [
-                  { StartTime: { $gte: newAppointment.StartTime } },
-                  { StartTime: { $lt: newAppointment.EndTime } },
-              ],
-          },
-          {
-              $and: [
-                  { EndTime: { $gt: newAppointment.StartTime } },
-                  { EndTime: { $lte: newAppointment.EndTime } },
-              ],
-          },
+        {
+          $and: [
+            { StartTime: { $lt: newAppointment.EndTime } },
+            { EndTime: { $gt: newAppointment.StartTime } },
+          ],
+        },
+        {
+          $and: [
+            { StartTime: { $gte: newAppointment.StartTime } },
+            { StartTime: { $lt: newAppointment.EndTime } },
+          ],
+        },
+        {
+          $and: [
+            { EndTime: { $gt: newAppointment.StartTime } },
+            { EndTime: { $lte: newAppointment.EndTime } },
+          ],
+        },
       ],
-  });
+    });
 
-  return collidesWith;
-}
-
+    return collidesWith;
+  }
 
   //-------------------------------------------------------------------------------------
   // Gestion Usuarios
@@ -405,19 +419,21 @@ async checkTimeCollisions(newAppointment, existingAppointmentId = null) {
       console.log("Token generado:", token);
       res.cookie("token", token);
 
-      res.status(200).json({ roles:['client'],userSaved, msg: "User created" });
+      res
+        .status(200)
+        .json({ roles: ["client"], userSaved, msg: "User created" });
     } catch (error) {
       res.status(500).json({ msg: "Server error" });
     }
   }
 
-  async generateTempPassword(){
+  async generateTempPassword() {
     // Simple example: generate a random string
     return Math.random().toString(36).slice(2);
-  };
+  }
 
   async updatePasswordEmail(req, res) {
-    try{
+    try {
       console.log("updatePassword DAO");
       const { email } = req.body;
       console.log(email);
@@ -430,40 +446,38 @@ async checkTimeCollisions(newAppointment, existingAppointmentId = null) {
           .json({ msg: "No account with this email address exists." });
       }
 
-      const randPass = await this.generateTempPassword()
+      const randPass = await this.generateTempPassword();
       console.log("randPass:", randPass);
       // Generate temporary password or reset token
       const tempPassword = await bcrypt.hash(randPass, 10);
 
       console.log("tempPassword:", tempPassword);
       // Update user's document in the database with the temporary password or reset token
-      await User.findOneAndUpdate({ email }, { password: tempPassword});      
+      await User.findOneAndUpdate({ email }, { password: tempPassword });
       return randPass;
     } catch (error) {
       res.status(500).json({ msg: "Server error" });
     }
-}
+  }
 
-
-    
-    //-------------------------------------------------------------------------------------
-    //                               GalleryImage Functions
-    //-------------------------------------------------------------------------------------
-      async addGalleryImage(imageData,req, res, next) {
-          console.log('addGalleryImage singleton:',imageData);
-          try {
-              const result = await Gallery.create(imageData);
-              res.status(201).json({data: imageData, result : result });
-          } catch (error) {
-              res.status(500).json({ message: `Error del servidor: ${error}` });
-          }
-      }
+  //-------------------------------------------------------------------------------------
+  //                               GalleryImage Functions
+  //-------------------------------------------------------------------------------------
+  async addGalleryImage(imageData, req, res, next) {
+    console.log("addGalleryImage singleton:", imageData);
+    try {
+      const result = await Gallery.create(imageData);
+      res.status(201).json({ data: imageData, result: result });
+    } catch (error) {
+      res.status(500).json({ message: `Error del servidor: ${error}` });
+    }
+  }
 
   async loginUser(req, res, next) {
     try {
       //check for find the user usernames in the db
       const { email, password } = req.body;
-      console.log('Singleton loginUser:')
+      console.log("Singleton loginUser:");
       console.log(email, password);
       const userFound = await User.findOne({ email: email }).exec();
       if (!userFound) {
@@ -476,8 +490,9 @@ async checkTimeCollisions(newAppointment, existingAppointmentId = null) {
         const match = await bcrypt.compare(password, userFound.password);
 
         if (match) {
-
-          const userTypeFound = await Usertype.findOne({ _id: userFound.type }).exec();
+          const userTypeFound = await Usertype.findOne({
+            _id: userFound.type,
+          }).exec();
 
           const token = await createAccessToken({ id: userFound._id });
           console.log("Token generado:", token);
@@ -531,20 +546,23 @@ async checkTimeCollisions(newAppointment, existingAppointmentId = null) {
     }
   }
 
-    async deleteGalleryImage(req, res, next) {
-        console.log('deleteGalleryImage singleton:',req.params.id);
-        try {
-            const product = await Gallery.findByIdAndDelete(req.params.id);
-            if(!product){
-                return res.status(404).json({ msg: 'Product not found' });
-            }
-            res.status(200).json({ state: true, message: 'La imagen se ha eliminado exitosamente' });
-        } catch (error) {
-            res.status(500).json({ message: `Error del servidor: ${error}` });
-        }
-        next();
+  async deleteGalleryImage(req, res, next) {
+    console.log("deleteGalleryImage singleton:", req.params.id);
+    try {
+      const product = await Gallery.findByIdAndDelete(req.params.id);
+      if (!product) {
+        return res.status(404).json({ msg: "Product not found" });
       }
-      
+      res.status(200).json({
+        state: true,
+        message: "La imagen se ha eliminado exitosamente",
+      });
+    } catch (error) {
+      res.status(500).json({ message: `Error del servidor: ${error}` });
+    }
+    next();
+  }
+
   //CREATE  A LOGOUT
   async logout(req, res) {
     res.cookie("token", "", { expires: new Date(0) });
@@ -694,469 +712,491 @@ async checkTimeCollisions(newAppointment, existingAppointmentId = null) {
     next();
   }
 
+  async getAllImages(req, res, next) {
+    try {
+      const images = await Gallery.find({ status: false });
 
-    async getAllImages(req, res, next) {
-        try {
-            const images = await Gallery.find({status: false});
-    
-            if (images.length === 0) {
-                return res.status(404).json({ message: 'No se encontraron imágenes en la galería' });
-            }
-    
-            res.status(200).json(images);
-        } catch (error) {
-            res.status(500).json({ message: `Error del servidor: ${error}` });
-        }
-        next();
+      if (images.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "No se encontraron imágenes en la galería" });
       }
 
-    async getImagesAdmin(req, res, next) {
-        try {
-            const images = await Gallery.find({});
-            if (images.length === 0) {
-                return res.status(404).json({ message: 'No se encontraron imágenes en la galería' });
-            }
-    
-            res.status(200).json(images);
-        } catch (error) {
-            res.status(500).json({ message: `Error del servidor: ${error}` });
-        }
-        next();
+      res.status(200).json(images);
+    } catch (error) {
+      res.status(500).json({ message: `Error del servidor: ${error}` });
     }
+    next();
+  }
 
-    async changeStatus(req, res, next) {
-        console.log('changeStatus singleton:',req.params.id);
-        try {
-            const imageId = req.params.id; 
-            const image = await Gallery.findOne({ _id: imageId });
-            console.log('changeStatus singleton:',image);
-            if (!image) {
-                return res.status(404).json({ message: 'La imagen no se encuentra' });
-            }
-    
-            const updateFields = {
-                "status": !image.status
-            };
-    
-            // Actualizar la imagen en la base de datos
-            await Gallery.updateOne({ _id: req.params.id }, { $set: updateFields });
-    
-            res.status(200).json({ state: true, message: 'La imagen se ha modificado exitosamente' });
-        } catch (error) {
-            res.status(500).json({ message: `Error del servidor: ${error}` });
-        }
-        next();
-    }
-
-    //-------------------------------------------------------------------------------------
-    //                                 Message Functions
-    //-------------------------------------------------------------------------------------
-    
-    async addMessage(req, res, next) {
-        try {
-            const jsonMessage = req.body;
-            await Message.create({
-                "user": jsonMessage.user,
-                "message": jsonMessage.message,
-                "response": jsonMessage.response,
-                "type": jsonMessage.type,
-                "date": jsonMessage.date,
-                "galleryImageId": jsonMessage.galleryImageId,
-                "status": jsonMessage.status
-            });
-    
-            res.status(201).json({ state: true, message: 'El mensaje se ha agregado exitosamente' });
-        } catch (error) {
-            res.status(500).json({ message: `Error del servidor: ${error}` });
-        }
-        next();
-    }
-
-    async deleteMessage(req, res, next) {
-        try {
-            const jsonMessage = req.body;
-            const messageId = jsonMessage.messageId; 
-    
-        
-            const messageFound = await Message.findOne({ _id: messageId });
-    
-            if (!messageFound) {
-                return res.status(404).json({ message: 'El mensaje no se encuentra' });
-            }
-    
-            // Eliminar el mensaje de la base de datos
-            await Message.deleteOne({ _id: messageId });
-    
-            res.status(200).json({ state: true, message: 'El mensaje se ha eliminado exitosamente' });
-        } catch (error) {
-            res.status(500).json({ message: `Error del servidor: ${error}` });
-        }
-        next();
-    }
-
-    async getAllMessages(req, res, next){
-        try {
-            const messages = await Message.find({});
-            
-            if (messages.length===0){
-                return res.status(404).json({message: `No se encontraron mensajes`})
-            }
-
-            res.status(200).json(messages);
-        } catch (error){
-            res.status(500).jeson({message: `Error del servidor: ${error}`})
-        }
-        next();
-    }
-    
-    
-    //-------------------------------------------------------------------------------------
-    //                                
-    //-------------------------------------------------------------------------------------
-    async updatePassword(req, res, next) {
-        try{
-            const { email, newPassword, confirmPassword } = req.body;
-
-            if (!email || !newPassword || !confirmPassword) {
-                return res.status(400).json({ msg: 'Please enter all fields' });
-            }
-
-            const userFound = await User.findOne({ email: email }).exec();
-            if(!userFound){
-                res.status(400).json({ msg: 'User has no register' });
-                return false
-            } 
-
-            if (newPassword !== confirmPassword) {
-                return res.status(400).json({ msg: 'Passwords do not match' });
-            }
-
-            const hashedPassword = await bcrypt.hash(newPassword, 10);
-            const newUser = await User.create({ "email": email, "password": hashedPassword });
-            res.status(200).json({ msg: 'User created' });
-        } catch {
-            res.status(500).json({ msg: 'Server error' });
-        }
-    }
-
-    /////////////////////////////////////
-    ////////////  PRODUCT  //////////////
-    /////////////////////////////////////
-
-    async getAllProducts(req, res, next) {
-        try {
-            const products = await Product.find();
-            res.status(200).json(products);
-        } catch (error) {
-            res.status(500).json({ msg: 'Server error' + error });
-        }
-        next();
-    }
-
-    async getAllProductsActive(req, res, next) {
-        try {
-          const products = await Product.find({ $or: [{ status: "active" }, { status: "disponible" }] });
-            res.status(200).json(products);
-        } catch (error) {
-            res.status(500).json({ msg: 'Server error' + error });
-        }
-        next();
-    }
-
-    async createProduct(productData) {
-        try {
-            const product = await Product.create(productData);
-            return { data: productData, result: product };  // Return the product instead of sending a response
-        } catch (error) {
-            console.error(error);
-            throw new Error('Server error' + error);  // Throw an error to be caught by the calling function
-        }
-    }
-
-    async updateProduct(req, res, next) {
-        const productData = req.body;
-        console.log(productData);
-        try {
-            const product = await Product.findByIdAndUpdate(productData._id, productData, { new: true, lean: true });
-            if (!product) {
-                return res.status(404).json({ msg: 'Product not found' });
-            }
-            return res.status(201).json(product);
-        } catch (error) {
-            console.error(error);
-            return res.status(500).json({ msg: 'Server error' + error });
-        }
-    }
-
-    async deleteProduct(req, res, next) {
-        try {
-            const product = await Product.findByIdAndDelete(req.params.id);
-            if (!product) {
-                return res.status(404).json({ msg: 'Product not found' });
-            }
-            return res.status(200).json(product);
-        } catch (error) {
-            console.error(error);
-            return res.status(500).json({ msg: 'Server error' + error });
-        }
+  async getImagesAdmin(req, res, next) {
+    try {
+      const images = await Gallery.find({});
+      if (images.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "No se encontraron imágenes en la galería" });
       }
 
-      async getProductById(req, res, next) {
-        try{
-          const product = await Product.findById(req.params.id);
-          if(!product){
-            return res.status(404).json({ msg: 'Product not found' });
-          }
-          return res.status(200).json(product);
-        }catch(error){
-            console.error(error);
-            return res.status(500).json({ msg: 'Server error' + error });
-        }
-      
-      }
-
-      //////////////////////////////
-      //ShoppingCart
-      //////////////////////////////
-
-      async getCarUser (req, res, next) {
-        try {
-            console.log("entro a getCarUser singleton",req.params.id);
-            const carts = await ShoppingCart.findOne({ user: req.params.id });
-            console.log("carts",carts);
-            if (!carts) {  // Check if the array is empty
-                const newCart = await ShoppingCart.create({ user: req.params.id });
-                if (!newCart) {
-                    return res.status(404).json({ msg: 'Error creating cart' });
-                }
-                return res.status(200).json(newCart);
-            } else {
-                return res.status(200).json(carts);  // Return the first cart
-            }
-        } catch (error) {
-            res.status(500).json({ message: "Server error: " + error });
-        }
+      res.status(200).json(images);
+    } catch (error) {
+      res.status(500).json({ message: `Error del servidor: ${error}` });
     }
+    next();
+  }
 
-    async addProduct (req, res, next) {
-      try {
-          const cart = await ShoppingCart.findOne({ user: req.params.userId });
-          if (!cart) {
-              return res.status(404).json({ msg: 'Cart not found' });
-          }
-          // Find if the product is already in the cart
-          const productIndex = cart.products.findIndex(p => p.product.toString() === req.params.productId);
-          if (productIndex > -1) {
-              // Update the quantity if the product is already in the cart
-              cart.products[productIndex].quantity += parseInt(req.params.quantity);
-          } else {
-              // Add the product with quantity to the cart
-              cart.products.push({ product: req.params.productId, quantity: parseInt(req.params.quantity) });
-          }
-          
-          // Update the date
-          cart.updateDate = Date.now();
-
-          // Save the updated cart
-          await cart.save();
-  
-          res.status(200).json(cart);
-  
-      } catch (error) {
-          res.status(500).json({ message: "Server error: " + error });
+  async changeStatus(req, res, next) {
+    console.log("changeStatus singleton:", req.params.id);
+    try {
+      const imageId = req.params.id;
+      const image = await Gallery.findOne({ _id: imageId });
+      console.log("changeStatus singleton:", image);
+      if (!image) {
+        return res.status(404).json({ message: "La imagen no se encuentra" });
       }
+
+      const updateFields = {
+        status: !image.status,
+      };
+
+      // Actualizar la imagen en la base de datos
+      await Gallery.updateOne({ _id: req.params.id }, { $set: updateFields });
+
+      res.status(200).json({
+        state: true,
+        message: "La imagen se ha modificado exitosamente",
+      });
+    } catch (error) {
+      res.status(500).json({ message: `Error del servidor: ${error}` });
+    }
+    next();
+  }
+
+  //-------------------------------------------------------------------------------------
+  //                                 Message Functions
+  //-------------------------------------------------------------------------------------
+
+  async addMessage(req, res, next) {
+    try {
+      const jsonMessage = req.body;
+      await Message.create({
+        user: jsonMessage.user,
+        message: jsonMessage.message,
+        response: jsonMessage.response,
+        type: jsonMessage.type,
+        date: jsonMessage.date,
+        galleryImageId: jsonMessage.galleryImageId,
+        status: jsonMessage.status,
+      });
+
+      res.status(201).json({
+        state: true,
+        message: "El mensaje se ha agregado exitosamente",
+      });
+    } catch (error) {
+      res.status(500).json({ message: `Error del servidor: ${error}` });
+    }
+    next();
+  }
+
+  async deleteMessage(req, res, next) {
+    try {
+      const jsonMessage = req.body;
+      const messageId = jsonMessage.messageId;
+
+      const messageFound = await Message.findOne({ _id: messageId });
+
+      if (!messageFound) {
+        return res.status(404).json({ message: "El mensaje no se encuentra" });
+      }
+
+      // Eliminar el mensaje de la base de datos
+      await Message.deleteOne({ _id: messageId });
+
+      res.status(200).json({
+        state: true,
+        message: "El mensaje se ha eliminado exitosamente",
+      });
+    } catch (error) {
+      res.status(500).json({ message: `Error del servidor: ${error}` });
+    }
+    next();
+  }
+
+  async getAllMessages(req, res, next) {
+    try {
+      const messages = await Message.find({});
+
+      if (messages.length === 0) {
+        return res.status(404).json({ message: `No se encontraron mensajes` });
+      }
+
+      res.status(200).json(messages);
+    } catch (error) {
+      res.status(500).jeson({ message: `Error del servidor: ${error}` });
+    }
+    next();
+  }
+
+  //-------------------------------------------------------------------------------------
+  //
+  //-------------------------------------------------------------------------------------
+  async updatePassword(req, res, next) {
+    try {
+      const { email, newPassword, confirmPassword } = req.body;
+
+      if (!email || !newPassword || !confirmPassword) {
+        return res.status(400).json({ msg: "Please enter all fields" });
+      }
+
+      const userFound = await User.findOne({ email: email }).exec();
+      if (!userFound) {
+        res.status(400).json({ msg: "User has no register" });
+        return false;
+      }
+
+      if (newPassword !== confirmPassword) {
+        return res.status(400).json({ msg: "Passwords do not match" });
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      const newUser = await User.create({
+        email: email,
+        password: hashedPassword,
+      });
+      res.status(200).json({ msg: "User created" });
+    } catch {
+      res.status(500).json({ msg: "Server error" });
+    }
+  }
+
+  /////////////////////////////////////
+  ////////////  PRODUCT  //////////////
+  /////////////////////////////////////
+
+  async getAllProducts(req, res, next) {
+    try {
+      const products = await Product.find();
+      res.status(200).json(products);
+    } catch (error) {
+      res.status(500).json({ msg: "Server error" + error });
+    }
+    next();
+  }
+
+  async getAllProductsActive(req, res, next) {
+    try {
+      const products = await Product.find({
+        $or: [{ status: "active" }, { status: "disponible" }],
+      });
+      res.status(200).json(products);
+    } catch (error) {
+      res.status(500).json({ msg: "Server error" + error });
+    }
+    next();
+  }
+
+  async createProduct(productData) {
+    try {
+      const product = await Product.create(productData);
+      return { data: productData, result: product }; // Return the product instead of sending a response
+    } catch (error) {
+      console.error(error);
+      throw new Error("Server error" + error); // Throw an error to be caught by the calling function
+    }
+  }
+
+  async updateProduct(req, res, next) {
+    const productData = req.body;
+    console.log(productData);
+    try {
+      const product = await Product.findByIdAndUpdate(
+        productData._id,
+        productData,
+        { new: true, lean: true }
+      );
+      if (!product) {
+        return res.status(404).json({ msg: "Product not found" });
+      }
+      return res.status(201).json(product);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ msg: "Server error" + error });
+    }
+  }
+
+  async deleteProduct(req, res, next) {
+    try {
+      const product = await Product.findByIdAndDelete(req.params.id);
+      if (!product) {
+        return res.status(404).json({ msg: "Product not found" });
+      }
+      return res.status(200).json(product);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ msg: "Server error" + error });
+    }
+  }
+
+  async getProductById(req, res, next) {
+    try {
+      const product = await Product.findById(req.params.id);
+      if (!product) {
+        return res.status(404).json({ msg: "Product not found" });
+      }
+      return res.status(200).json(product);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ msg: "Server error" + error });
+    }
+  }
+
+  //////////////////////////////
+  //ShoppingCart
+  //////////////////////////////
+
+  async getCarUser(req, res, next) {
+    try {
+      console.log("entro a getCarUser singleton", req.params.id);
+      const carts = await ShoppingCart.findOne({ user: req.params.id });
+      console.log("carts", carts);
+      if (!carts) {
+        // Check if the array is empty
+        const newCart = await ShoppingCart.create({ user: req.params.id });
+        if (!newCart) {
+          return res.status(404).json({ msg: "Error creating cart" });
+        }
+        return res.status(200).json(newCart);
+      } else {
+        return res.status(200).json(carts); // Return the first cart
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Server error: " + error });
+    }
+  }
+
+  async addProduct(req, res, next) {
+    try {
+      const cart = await ShoppingCart.findOne({ user: req.params.userId });
+      if (!cart) {
+        return res.status(404).json({ msg: "Cart not found" });
+      }
+      // Find if the product is already in the cart
+      const productIndex = cart.products.findIndex(
+        (p) => p.product.toString() === req.params.productId
+      );
+      if (productIndex > -1) {
+        // Update the quantity if the product is already in the cart
+        cart.products[productIndex].quantity += parseInt(req.params.quantity);
+      } else {
+        // Add the product with quantity to the cart
+        cart.products.push({
+          product: req.params.productId,
+          quantity: parseInt(req.params.quantity),
+        });
+      }
+
+      // Update the date
+      cart.updateDate = Date.now();
+
+      // Save the updated cart
+      await cart.save();
+
+      res.status(200).json(cart);
+    } catch (error) {
+      res.status(500).json({ message: "Server error: " + error });
+    }
   }
 
   async deleteProductFromCart(req, res, next) {
-      try {
-        console.log("Start deleteProductFromCart");
-    
-        const userId = req.params.userId;
-        const productId = req.params.productId;
-    
-        console.log("userId:", userId);
-        console.log("productId:", productId);
-    
-        // Find the cart by user ID
+    try {
+      console.log("Start deleteProductFromCart");
+
+      const userId = req.params.userId;
+      const productId = req.params.productId;
+
+      console.log("userId:", userId);
+      console.log("productId:", productId);
+
+      // Find the cart by user ID
+      const cart = await ShoppingCart.findOne({ user: userId });
+
+      console.log("cart:", cart);
+
+      if (!cart) {
+        return res.status(404).json({ message: "Cart not found" });
+      }
+
+      // Find the index of the product in the cart's products array
+      const productIndex = cart.products.findIndex(
+        (p) => p.product.toString() === productId
+      );
+
+      console.log("productIndex:", productIndex);
+
+      // If product is not found, return 404
+      if (productIndex === -1) {
+        return res.status(404).json({ message: "Product not found in cart" });
+      }
+
+      // Remove the product from the cart's products array
+      cart.products.splice(productIndex, 1);
+
+      // Save the updated cart back to the database
+      await cart.save();
+
+      console.log("Product removed from cart");
+
+      res.status(200).json({ message: "Product removed from cart" });
+    } catch (error) {
+      console.log("Error:", error);
+      res.status(500).json({ message: "Server error: " + error });
+    }
+  }
+
+  async updateProductQuantity(req, res, next) {
+    try {
+      const userId = req.params.userId;
+      const productId = req.params.productId;
+      const { newQuantity } = req.body;
+
+      if (newQuantity === 0) {
+        // If the new quantity is 0, remove the product from the cart
         const cart = await ShoppingCart.findOne({ user: userId });
-    
-        console.log("cart:", cart);
-    
         if (!cart) {
           return res.status(404).json({ message: "Cart not found" });
         }
-    
-        // Find the index of the product in the cart's products array
+
         const productIndex = cart.products.findIndex(
           (p) => p.product.toString() === productId
         );
-    
-        console.log("productIndex:", productIndex);
-    
-        // If product is not found, return 404
+
         if (productIndex === -1) {
           return res.status(404).json({ message: "Product not found in cart" });
         }
-    
-        // Remove the product from the cart's products array
+
         cart.products.splice(productIndex, 1);
-    
-        // Save the updated cart back to the database
         await cart.save();
-    
-        console.log("Product removed from cart");
-    
-        res.status(200).json({ message: "Product removed from cart" });
-      } catch (error) {
-        console.log("Error:", error);
-        res.status(500).json({ message: "Server error: " + error });
+
+        return res.status(200).json({ message: "Product removed from cart" });
       }
+
+      // If the new quantity is not 0, update the quantity in the cart
+      const cart = await ShoppingCart.findOne({ user: userId });
+      if (!cart) {
+        return res.status(404).json({ message: "Cart not found" });
+      }
+
+      const productIndex = cart.products.findIndex(
+        (p) => p.product.toString() === productId
+      );
+
+      if (productIndex === -1) {
+        return res.status(404).json({ message: "Product not found in cart" });
+      }
+
+      cart.products[productIndex].quantity = newQuantity;
+      await cart.save();
+
+      res.status(200).json({ message: "Product quantity updated" });
+    } catch (error) {
+      res.status(500).json({ message: "Server error: " + error });
+    }
   }
 
-      async updateProductQuantity (req, res, next) {
-        try {
-          const userId = req.params.userId;
-          const productId = req.params.productId;
-          const { newQuantity } = req.body;
+  async emptyCart(userId) {
+    try {
+      const cart = await ShoppingCart.findOne({ user: userId });
+      cart.products = [];
+      await cart.save();
 
-          if (newQuantity === 0) {
-              // If the new quantity is 0, remove the product from the cart
-              const cart = await ShoppingCart.findOne({ user: userId });
-              if (!cart) {
-                  return res.status(404).json({ message: "Cart not found" });
-              }
+      return { message: "Cart emptied" };
+    } catch (error) {
+      throw new Error("Server error: " + error);
+    }
+  }
 
-              const productIndex = cart.products.findIndex(
-                  (p) => p.product.toString() === productId
-              );
+  /////////////////////////////////////
+  ////////////  Sale  //////////////
+  /////////////////////////////////////
 
-              if (productIndex === -1) {
-                  return res.status(404).json({ message: "Product not found in cart" });
-              }
-
-              cart.products.splice(productIndex, 1);
-              await cart.save();
-
-              return res.status(200).json({ message: "Product removed from cart" });
-          }
-
-          // If the new quantity is not 0, update the quantity in the cart
-          const cart = await ShoppingCart.findOne({ user: userId });
-          if (!cart) {
-              return res.status(404).json({ message: "Cart not found" });
-          }
-
-          const productIndex = cart.products.findIndex(
-              (p) => p.product.toString() === productId
-          );
-
-          if (productIndex === -1) {
-              return res.status(404).json({ message: "Product not found in cart" });
-          }
-
-          cart.products[productIndex].quantity = newQuantity;
-          await cart.save();
-
-          res.status(200).json({ message: "Product quantity updated" });
-      } catch (error) {
-          res.status(500).json({ message: "Server error: " + error });
+  async createSale(saleData) {
+    try {
+      console.log("Singleton createSale...");
+      const newSale = await Sales.create(saleData);
+      if (!newSale) {
+        throw new Error("Sale not found");
       }
+      await this.emptyCart(saleData.userBuyer);
+      return newSale;
+    } catch (error) {
+      throw new Error("Server error: " + error);
+    }
+  }
 
+  async userHistory(userId) {
+    try {
+      const history = await Sales.find({ userBuyer: userId }).exec();
+      console.log("Singleton userHistory:", history);
+      return history;
+    } catch (error) {
+      res.status(500).json({ message: "Server error: " + error });
+    }
+  }
+
+  async adminHistory() {
+    try {
+      const history = await Sales.find({}).exec();
+      return history;
+    } catch (error) {
+      res.status(500).json({ message: "Server error: " + error });
+    }
+  }
+
+  async updateInventory(productId, quantity) {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new Error("Product not found");
     }
 
-    async emptyCart (userId) {
-      try{
-        const cart = await ShoppingCart.findOne({ user: userId });
-        cart.products = [];
-        await cart.save();
+    product.stock -= quantity;
 
-        return { message: "Cart emptied" };
-      }catch(error){
-        throw new Error("Server error: " + error);
-      }
+    if (product.stock < 0) {
+      throw new Error("Not enough stock");
     }
 
-    /////////////////////////////////////
-    ////////////  Sale  //////////////
-    /////////////////////////////////////
+    await product.save();
+  }
 
-    async createSale(saleData) {
-      try{
-        console.log("Singleton createSale...");
-        const newSale = await Sales.create(saleData);
-        if(!newSale){
-          throw new Error("Sale not found");
+  async updateSale(saleId, saleData) {
+    try {
+      console.log("Singleton updateSale...");
+      const sale = await Sales.findById(saleId);
+      if (!sale) {
+        throw new Error("Sale not found");
+      }
+
+      console.log("Singleton updateSale saleData:", saleData);
+      console.log("Singleton updateSale sale:", sale);
+      // If the sale is being updated to "Aceptado", update the inventory
+      if (saleData.status === "Aceptado" && sale.status !== "Aceptado") {
+        for (const product of sale.products) {
+          console.log("Singleton updateSale product:", product);
+          this.updateInventory(product._id, product.quantity);
         }
-        await this.emptyCart(saleData.userBuyer);
-        return newSale;
-      } catch(error){
-        throw new Error("Server error: " + error);
       }
-    }
 
-    async userHistory(userId) {
-      try{  
-         const history = await Sales.find({userBuyer: userId}).exec();
-         console.log("Singleton userHistory:",history);
-         return history;
-      }catch(error){
-        res.status(500).json({ message: "Server error: " + error });
-      }
+      // Update the sale
+      const updatedSale = await Sales.findByIdAndUpdate(saleId, saleData, {
+        new: true,
+        lean: true,
+      });
+      return updatedSale;
+    } catch (error) {
+      res.status(500).json({ message: "Server error: " + error });
     }
-
-    async adminHistory(){
-      try{
-        const history = await Sales.find({}).exec();
-        return history;
-      }catch(error){
-        res.status(500).json({ message: "Server error: " + error });
-      }
-    }
-
-    async updateInventory(productId, quantity) {
-      const product = await Product.findById(productId);
-      if (!product) {
-        throw new Error('Product not found');
-      }
-      
-      product.stock -= quantity;
-      
-      if (product.stock < 0) {
-        throw new Error('Not enough stock');
-      }
-      
-      await product.save();
-    }
-    
-    async updateSale(saleId, saleData){
-      try{
-        console.log("Singleton updateSale...");
-        const sale = await Sales.findById(saleId);
-        if (!sale) {
-          throw new Error('Sale not found');
-        }
-        
-        console.log("Singleton updateSale saleData:",saleData);
-        console.log("Singleton updateSale sale:",sale);
-        // If the sale is being updated to "Aceptado", update the inventory
-        if (saleData.status === 'Aceptado' && sale.status !== 'Aceptado') {
-          for (const product of sale.products) {
-            console.log("Singleton updateSale product:",product);
-            this.updateInventory(product._id, product.quantity);
-          }
-        }
-        
-        // Update the sale
-        const updatedSale = await Sales.findByIdAndUpdate(saleId, saleData, { new: true, lean: true });
-        return updatedSale;
-      }catch(error){
-        res.status(500).json({ message: "Server error: " + error });
-      }
-    }
-  
-  
+  }
 }
-
 
 let instance = null;
 

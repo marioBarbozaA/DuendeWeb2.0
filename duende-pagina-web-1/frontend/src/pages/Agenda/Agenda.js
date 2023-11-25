@@ -17,6 +17,7 @@ import {
 } from '@syncfusion/ej2-react-schedule';
 import { DropDownListComponent } from '@syncfusion/ej2-react-dropdowns';
 import { DateTimePickerComponent } from '@syncfusion/ej2-react-calendars';
+
 import { registerLicense } from '@syncfusion/ej2-base';
 import { L10n } from '@syncfusion/ej2-base';
 import axios from 'axios';
@@ -36,29 +37,37 @@ L10n.load({
 	},
 });
 
-
 const Scheduler = () => {
-	const scheduleObj = useRef(null);
-	// create const use state event type and setEventType
-
 	const [eventTypes, setEventTypes] = useState({});
 
 	const [localData, setLocalData] = useState([]);
-
 	useEffect(() => {
 		const fetchData = async () => {
-		  try {
-			const response = await axios.get('http://localhost:3500/appointments/getAll'); 
-			setLocalData(response.data); // Asigna los datos obtenidos a localData
-		  } catch (error) {
-			console.error('Error al obtener datos de la API:', error);
-		  }
+			try {
+				const response = await axios.get(
+					'http://localhost:3500/appointments/getAll',
+				);
+				console.log('Datos recibidos de la API:', response.data);
+				if (Array.isArray(response.data)) {
+					// Asegúrate de que la estructura de los datos coincida con lo que espera el componente
+					const formattedData = response.data.map(item => {
+						// Transforma los datos aquí si es necesario
+						return item;
+					});
+					setLocalData(formattedData);
+				} else {
+					console.error(
+						'La respuesta de la API no es un arreglo:',
+						response.data,
+					);
+				}
+			} catch (error) {
+				console.error('Error al obtener datos de la API:', error);
+			}
 		};
-	
-		fetchData(); // Llama a la función fetchData al montar el componente
-	  }, []); // El segundo argumento del useEffect ([]) asegura que la llamada se realice solo una vez al montar el componente
 
-	// initialize eventTypes with initial event types from localData
+		fetchData();
+	}, []);
 	useEffect(() => {
 		const initialEventTypes = {};
 		localData.forEach(event => {
@@ -66,7 +75,6 @@ const Scheduler = () => {
 		});
 		setEventTypes(initialEventTypes);
 	}, [localData]);
-
 
 	const fieldsData = {
 		id: 'Id',
@@ -89,9 +97,88 @@ const Scheduler = () => {
 		//args.scroll = { enabled: false };
 		args.interval = 10;
 	};
+
+	const handleActionBegin = async args => {
+		if (
+			!['eventCreate', 'eventChange', 'eventRemove'].includes(args.requestType)
+		) {
+			return;
+		}
+		const eventData =
+			args.data && args.data instanceof Array ? args.data[0] : args.data;
+
+		if (!eventData) {
+			console.error('No se encontraron datos de evento.');
+			return;
+		}
+		console.log('EventData:', eventData);
+
+		const isUpdate = eventData._id != null;
+		const apiEndpoint = isUpdate ? '/update' : '/create';
+
+		if (
+			args.requestType === 'eventCreate' ||
+			args.requestType === 'eventChange'
+		) {
+			args.cancel = true;
+
+			try {
+				const response = await axios({
+					method: isUpdate ? 'put' : 'post',
+					url: `http://localhost:3500/appointments${apiEndpoint}`,
+					data: eventData,
+				});
+
+				console.log('API response for save', response); // Para depuración
+
+				setLocalData(prevData => {
+					if (isUpdate) {
+						return prevData.map(event =>
+							event.Id === eventData.Id
+								? { ...event, ...response.data }
+								: event,
+						);
+					} else {
+						return [...prevData, response.data];
+					}
+				});
+			} catch (error) {
+				console.error('Error al guardar los datos del evento:', error);
+				console.log('Error data', error.response || error.message);
+			}
+		} else if (args.requestType === 'eventRemove') {
+			args.cancel = true;
+			const eventId = eventData._id;
+			console.log('event id ', eventId);
+
+			if (!eventId) {
+				console.error('No se pudo obtener el ID del evento para eliminar.');
+				return;
+			}
+
+			try {
+				const response = await axios.delete(
+					'http://localhost:3500/appointments/delete',
+					{
+						data: { id: eventId },
+					},
+				);
+
+				console.log('API response for delete', response); // Para depuración
+
+				setLocalData(prevData =>
+					prevData.filter(event => event._id !== eventId),
+				);
+			} catch (error) {
+				console.error('Error al eliminar el evento:', error);
+				console.log('Error data', error.response || error.message); // Para depuración
+			}
+		}
+	};
+
 	const Cita = props => {
-		console.log('Cita props', props);
-		console.log(Object.keys(props).length);
+		//console.log('Cita props', props);
+		//console.log(Object.keys(props).length);
 
 		return (
 			<table className='custom-event-editor'>
@@ -195,8 +282,8 @@ const Scheduler = () => {
 		);
 	};
 	const Entrega = props => {
-		console.log('Entrega props', props);
-		console.log(Object.keys(props).length);
+		//console.log('Entrega props', props);
+		//console.log(Object.keys(props).length);
 
 		return (
 			<table className='custom-event-editor'>
@@ -300,8 +387,8 @@ const Scheduler = () => {
 		);
 	};
 	const Otra = props => {
-		console.log('Otra props', props);
-		console.log(Object.keys(props).length);
+		//console.log('Otra props', props);
+		//console.log(Object.keys(props).length);
 		return (
 			<table className='custom-event-editor'>
 				<tbody>
@@ -395,7 +482,6 @@ const Scheduler = () => {
 				currentView='Month'
 				eventSettings={{
 					dataSource: localData,
-					//template: this.eventTemplate.bind(this),
 					fields: fieldsData,
 				}}
 				dragStart={onDragStart}
@@ -427,6 +513,7 @@ const Scheduler = () => {
 					props.element.style.border = `1px solid ${color.replace('0.3', '1')}`; // Borde con opacidad completa
 					props.element.style.color = 'black';
 				}}
+				actionBegin={handleActionBegin} // Añade el manejador de acción aquí
 			>
 				<ViewsDirective>
 					<ViewDirective
