@@ -386,8 +386,6 @@ class Singleton {
     return collidesWith;
   }
 
-
-
   //-------------------------------------------------------------------------------------
   // Gestion Usuarios
   //-------------------------------------------------------------------------------------
@@ -421,7 +419,9 @@ class Singleton {
       console.log("Token generado:", token);
       res.cookie("token", token);
 
-      res.status(200).json({ roles: ['client'], userSaved, msg: "User created" });
+      res
+        .status(200)
+        .json({ roles: ["client"], userSaved, msg: "User created" });
     } catch (error) {
       res.status(500).json({ msg: "Server error" });
     }
@@ -430,7 +430,7 @@ class Singleton {
   async generateTempPassword() {
     // Simple example: generate a random string
     return Math.random().toString(36).slice(2);
-  };
+  }
 
   async updatePasswordEmail(req, res) {
     try {
@@ -446,7 +446,7 @@ class Singleton {
           .json({ msg: "No account with this email address exists." });
       }
 
-      const randPass = await this.generateTempPassword()
+      const randPass = await this.generateTempPassword();
       console.log("randPass:", randPass);
       // Generate temporary password or reset token
       const tempPassword = await bcrypt.hash(randPass, 10);
@@ -460,13 +460,11 @@ class Singleton {
     }
   }
 
-
-
   //-------------------------------------------------------------------------------------
   //                               GalleryImage Functions
   //-------------------------------------------------------------------------------------
   async addGalleryImage(imageData, req, res, next) {
-    console.log('addGalleryImage singleton:', imageData);
+    console.log("addGalleryImage singleton:", imageData);
     try {
       const result = await Gallery.create(imageData);
       res.status(201).json({ data: imageData, result: result });
@@ -479,7 +477,7 @@ class Singleton {
     try {
       //check for find the user usernames in the db
       const { email, password } = req.body;
-      console.log('Singleton loginUser:')
+      console.log("Singleton loginUser:");
       console.log(email, password);
       const userFound = await User.findOne({ email: email }).exec();
       if (!userFound) {
@@ -492,8 +490,9 @@ class Singleton {
         const match = await bcrypt.compare(password, userFound.password);
 
         if (match) {
-
-          const userTypeFound = await Usertype.findOne({ _id: userFound.type }).exec();
+          const userTypeFound = await Usertype.findOne({
+            _id: userFound.type,
+          }).exec();
 
           const token = await createAccessToken({ id: userFound._id });
           console.log("Token generado:", token);
@@ -548,13 +547,18 @@ class Singleton {
   }
 
   async deleteGalleryImage(req, res, next) {
-    console.log('deleteGalleryImage singleton:', req.params.id);
+    console.log("deleteGalleryImage singleton:", req.params.id);
     try {
       const product = await Gallery.findByIdAndDelete(req.params.id);
       if (!product) {
-        return res.status(404).json({ msg: 'Product not found' });
+        return res.status(404).json({ msg: "Product not found" });
       }
-      res.status(200).json({ state: true, message: 'La imagen se ha eliminado exitosamente' });
+      res
+        .status(200)
+        .json({
+          state: true,
+          message: "La imagen se ha eliminado exitosamente",
+        });
     } catch (error) {
       res.status(500).json({ message: `Error del servidor: ${error}` });
     }
@@ -710,13 +714,14 @@ class Singleton {
     next();
   }
 
-
   async getAllImages(req, res, next) {
     try {
       const images = await Gallery.find({ status: false });
 
       if (images.length === 0) {
-        return res.status(404).json({ message: 'No se encontraron imágenes en la galería' });
+        return res
+          .status(404)
+          .json({ message: "No se encontraron imágenes en la galería" });
       }
 
       res.status(200).json(images);
@@ -730,7 +735,9 @@ class Singleton {
     try {
       const images = await Gallery.find({});
       if (images.length === 0) {
-        return res.status(404).json({ message: 'No se encontraron imágenes en la galería' });
+        return res
+          .status(404)
+          .json({ message: "No se encontraron imágenes en la galería" });
       }
 
       res.status(200).json(images);
@@ -741,23 +748,28 @@ class Singleton {
   }
 
   async changeStatus(req, res, next) {
-    console.log('changeStatus singleton:', req.params.id);
+    console.log("changeStatus singleton:", req.params.id);
     try {
       const imageId = req.params.id;
       const image = await Gallery.findOne({ _id: imageId });
-      console.log('changeStatus singleton:', image);
+      console.log("changeStatus singleton:", image);
       if (!image) {
-        return res.status(404).json({ message: 'La imagen no se encuentra' });
+        return res.status(404).json({ message: "La imagen no se encuentra" });
       }
 
       const updateFields = {
-        "status": !image.status
+        status: !image.status,
       };
 
       // Actualizar la imagen en la base de datos
       await Gallery.updateOne({ _id: req.params.id }, { $set: updateFields });
 
-      res.status(200).json({ state: true, message: 'La imagen se ha modificado exitosamente' });
+      res
+        .status(200)
+        .json({
+          state: true,
+          message: "La imagen se ha modificado exitosamente",
+        });
     } catch (error) {
       res.status(500).json({ message: `Error del servidor: ${error}` });
     }
@@ -772,16 +784,21 @@ class Singleton {
     try {
       const jsonMessage = req.body;
       await Message.create({
-        "user": jsonMessage.user,
-        "message": jsonMessage.message,
-        "response": jsonMessage.response,
-        "type": jsonMessage.type,
-        "date": jsonMessage.date,
-        "galleryImageId": jsonMessage.galleryImageId,
-        "status": jsonMessage.status
+        user: jsonMessage.user,
+        message: jsonMessage.message,
+        response: jsonMessage.response,
+        type: jsonMessage.type,
+        date: jsonMessage.date,
+        galleryImageId: jsonMessage.galleryImageId,
+        status: jsonMessage.status,
       });
 
-      res.status(201).json({ state: true, message: 'El mensaje se ha agregado exitosamente' });
+      res
+        .status(201)
+        .json({
+          state: true,
+          message: "El mensaje se ha agregado exitosamente",
+        });
     } catch (error) {
       res.status(500).json({ message: `Error del servidor: ${error}` });
     }
@@ -793,17 +810,21 @@ class Singleton {
       const jsonMessage = req.body;
       const messageId = jsonMessage.messageId;
 
-
       const messageFound = await Message.findOne({ _id: messageId });
 
       if (!messageFound) {
-        return res.status(404).json({ message: 'El mensaje no se encuentra' });
+        return res.status(404).json({ message: "El mensaje no se encuentra" });
       }
 
       // Eliminar el mensaje de la base de datos
       await Message.deleteOne({ _id: messageId });
 
-      res.status(200).json({ state: true, message: 'El mensaje se ha eliminado exitosamente' });
+      res
+        .status(200)
+        .json({
+          state: true,
+          message: "El mensaje se ha eliminado exitosamente",
+        });
     } catch (error) {
       res.status(500).json({ message: `Error del servidor: ${error}` });
     }
@@ -815,43 +836,45 @@ class Singleton {
       const messages = await Message.find({});
 
       if (messages.length === 0) {
-        return res.status(404).json({ message: `No se encontraron mensajes` })
+        return res.status(404).json({ message: `No se encontraron mensajes` });
       }
 
       res.status(200).json(messages);
     } catch (error) {
-      res.status(500).jeson({ message: `Error del servidor: ${error}` })
+      res.status(500).jeson({ message: `Error del servidor: ${error}` });
     }
     next();
   }
 
-
   //-------------------------------------------------------------------------------------
-  //                                
+  //
   //-------------------------------------------------------------------------------------
   async updatePassword(req, res, next) {
     try {
       const { email, newPassword, confirmPassword } = req.body;
 
       if (!email || !newPassword || !confirmPassword) {
-        return res.status(400).json({ msg: 'Please enter all fields' });
+        return res.status(400).json({ msg: "Please enter all fields" });
       }
 
       const userFound = await User.findOne({ email: email }).exec();
       if (!userFound) {
-        res.status(400).json({ msg: 'User has no register' });
-        return false
+        res.status(400).json({ msg: "User has no register" });
+        return false;
       }
 
       if (newPassword !== confirmPassword) {
-        return res.status(400).json({ msg: 'Passwords do not match' });
+        return res.status(400).json({ msg: "Passwords do not match" });
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
-      const newUser = await User.create({ "email": email, "password": hashedPassword });
-      res.status(200).json({ msg: 'User created' });
+      const newUser = await User.create({
+        email: email,
+        password: hashedPassword,
+      });
+      res.status(200).json({ msg: "User created" });
     } catch {
-      res.status(500).json({ msg: 'Server error' });
+      res.status(500).json({ msg: "Server error" });
     }
   }
 
@@ -864,17 +887,23 @@ class Singleton {
       const products = await Product.find();
       res.status(200).json(products);
     } catch (error) {
-      res.status(500).json({ msg: 'Server error' + error });
+      res.status(500).json({ msg: "Server error" + error });
     }
     next();
   }
 
   async getAllProductsActive(req, res, next) {
     try {
-      const products = await Product.find({ $or: [{ status: "active" }, { status: "disponible" }, { status: "true" }] });
+      const products = await Product.find({
+        $or: [
+          { status: "active" },
+          { status: "disponible" },
+          { status: "true" },
+        ],
+      });
       res.status(200).json(products);
     } catch (error) {
-      res.status(500).json({ msg: 'Server error' + error });
+      res.status(500).json({ msg: "Server error" + error });
     }
     next();
   }
@@ -882,10 +911,10 @@ class Singleton {
   async createProduct(productData) {
     try {
       const product = await Product.create(productData);
-      return { data: productData, result: product };  // Return the product instead of sending a response
+      return { data: productData, result: product }; // Return the product instead of sending a response
     } catch (error) {
       console.error(error);
-      throw new Error('Server error' + error);  // Throw an error to be caught by the calling function
+      throw new Error("Server error" + error); // Throw an error to be caught by the calling function
     }
   }
 
@@ -893,14 +922,18 @@ class Singleton {
     const productData = req.body;
     console.log(productData);
     try {
-      const product = await Product.findByIdAndUpdate(productData._id, productData, { new: true, lean: true });
+      const product = await Product.findByIdAndUpdate(
+        productData._id,
+        productData,
+        { new: true, lean: true }
+      );
       if (!product) {
-        return res.status(404).json({ msg: 'Product not found' });
+        return res.status(404).json({ msg: "Product not found" });
       }
       return res.status(201).json(product);
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ msg: 'Server error' + error });
+      return res.status(500).json({ msg: "Server error" + error });
     }
   }
 
@@ -908,12 +941,12 @@ class Singleton {
     try {
       const product = await Product.findByIdAndDelete(req.params.id);
       if (!product) {
-        return res.status(404).json({ msg: 'Product not found' });
+        return res.status(404).json({ msg: "Product not found" });
       }
       return res.status(200).json(product);
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ msg: 'Server error' + error });
+      return res.status(500).json({ msg: "Server error" + error });
     }
   }
 
@@ -921,14 +954,13 @@ class Singleton {
     try {
       const product = await Product.findById(req.params.id);
       if (!product) {
-        return res.status(404).json({ msg: 'Product not found' });
+        return res.status(404).json({ msg: "Product not found" });
       }
       return res.status(200).json(product);
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ msg: 'Server error' + error });
+      return res.status(500).json({ msg: "Server error" + error });
     }
-
   }
 
   //////////////////////////////
@@ -940,14 +972,15 @@ class Singleton {
       console.log("entro a getCarUser singleton", req.params.id);
       const carts = await ShoppingCart.findOne({ user: req.params.id });
       console.log("carts", carts);
-      if (!carts) {  // Check if the array is empty
+      if (!carts) {
+        // Check if the array is empty
         const newCart = await ShoppingCart.create({ user: req.params.id });
         if (!newCart) {
-          return res.status(404).json({ msg: 'Error creating cart' });
+          return res.status(404).json({ msg: "Error creating cart" });
         }
         return res.status(200).json(newCart);
       } else {
-        return res.status(200).json(carts);  // Return the first cart
+        return res.status(200).json(carts); // Return the first cart
       }
     } catch (error) {
       res.status(500).json({ message: "Server error: " + error });
@@ -958,16 +991,21 @@ class Singleton {
     try {
       const cart = await ShoppingCart.findOne({ user: req.params.userId });
       if (!cart) {
-        return res.status(404).json({ msg: 'Cart not found' });
+        return res.status(404).json({ msg: "Cart not found" });
       }
       // Find if the product is already in the cart
-      const productIndex = cart.products.findIndex(p => p.product.toString() === req.params.productId);
+      const productIndex = cart.products.findIndex(
+        (p) => p.product.toString() === req.params.productId
+      );
       if (productIndex > -1) {
         // Update the quantity if the product is already in the cart
         cart.products[productIndex].quantity += parseInt(req.params.quantity);
       } else {
         // Add the product with quantity to the cart
-        cart.products.push({ product: req.params.productId, quantity: parseInt(req.params.quantity) });
+        cart.products.push({
+          product: req.params.productId,
+          quantity: parseInt(req.params.quantity),
+        });
       }
 
       // Update the date
@@ -977,7 +1015,6 @@ class Singleton {
       await cart.save();
 
       res.status(200).json(cart);
-
     } catch (error) {
       res.status(500).json({ message: "Server error: " + error });
     }
@@ -1077,7 +1114,6 @@ class Singleton {
     } catch (error) {
       res.status(500).json({ message: "Server error: " + error });
     }
-
   }
 
   async emptyCart(userId) {
@@ -1134,13 +1170,13 @@ class Singleton {
   async updateInventory(productId, quantity) {
     const product = await Product.findById(productId);
     if (!product) {
-      throw new Error('Product not found');
+      throw new Error("Product not found");
     }
 
     product.stock -= quantity;
 
     if (product.stock < 0) {
-      throw new Error('Not enough stock');
+      throw new Error("Not enough stock");
     }
 
     await product.save();
@@ -1151,7 +1187,7 @@ class Singleton {
       console.log("Singleton updateSale...");
       const sale = await Sales.findById(saleId);
       if (!sale) {
-        throw new Error('Sale not found');
+        throw new Error("Sale not found");
       }
 
       console.log("Singleton updateSale saleData:", saleData);
@@ -1160,18 +1196,20 @@ class Singleton {
       // If the sale is being updated to "Aceptado", update the inventory
       // quiere decir que aqui se pone la logica del observable y notificar?????????
 
-      if (saleData.status === 'Aceptado' && sale.status !== 'Aceptado') {
+      if (saleData.status === "Aceptado" && sale.status !== "Aceptado") {
         // entonces aqui se pone la logica del observable y notificar
 
         for (const product of sale.products) {
           console.log("Singleton updateSale product:", product);
           this.updateInventory(product._id, product.quantity);
-
         }
       }
 
       // Update the sale
-      const updatedSale = await Sales.findByIdAndUpdate(saleId, saleData, { new: true, lean: true });
+      const updatedSale = await Sales.findByIdAndUpdate(saleId, saleData, {
+        new: true,
+        lean: true,
+      });
       return updatedSale;
     } catch (error) {
       res.status(500).json({ message: "Server error: " + error });
@@ -1183,42 +1221,48 @@ class Singleton {
   async createNotification(notificationDataArray) {
     try {
       // Check if the input is an array; if not, wrap it in an array
-      const notificationsArray = Array.isArray(notificationDataArray) ? notificationDataArray : [notificationDataArray];
-      const notifications = await NotificationModel.insertMany(notificationsArray);
-      console.log('Notifications created:', notifications);
+      const notificationsArray = Array.isArray(notificationDataArray)
+        ? notificationDataArray
+        : [notificationDataArray];
+      const notifications = await NotificationModel.insertMany(
+        notificationsArray
+      );
+      console.log("Notifications created:", notifications);
       return notifications;
     } catch (error) {
-      console.error('Error creating notifications:', error.message, error.errors);
+      console.error(
+        "Error creating notifications:",
+        error.message,
+        error.errors
+      );
       throw error;
     }
   }
-
 
   async getAllNotifications() {
     try {
       const notifications = await NotificationModel.find();
       return notifications;
     } catch (error) {
-      console.error('Error al obtener todas las notificaciones:', error);
+      console.error("Error al obtener todas las notificaciones:", error);
       throw error;
     }
   }
 
   async getUserNotifications(req, res, next) {
     try {
-      console.log('getUserNotifications singleton:', req.params.userId);
-      const notifications = await NotificationModel.find({ user: req.params.userId });
-      console.log('Notificaciones del usuario:', notifications);
+      console.log("getUserNotifications singleton:", req.params.userId);
+      const notifications = await NotificationModel.find({
+        user: req.params.userId,
+      });
+      console.log("Notificaciones del usuario:", notifications);
       return notifications;
     } catch (error) {
-      console.error('Error al obtener las notificaciones del usuario:', error);
+      console.error("Error al obtener las notificaciones del usuario:", error);
       throw error;
     }
   }
-
 }
-
-
 
 let instance = null;
 
