@@ -59,17 +59,6 @@ const Scheduler = () => {
 		}
 	};
 
-	// Función para verificar si un evento se superpone con eventos de tipo "Cita"
-    const esEventoSuperpuesto = (inicio, fin) => {
-        return localData.some(evento => {
-            if (evento.EventType === 'Cita') {
-                const inicioCita = new Date(evento.StartTime);
-                const finCita = new Date(evento.EndTime);
-                return (inicio < finCita && fin > inicioCita);
-            }
-            return false;
-        });
-    };
 
 	useEffect(() => {
 		if (shouldFetchData) {
@@ -117,15 +106,68 @@ const Scheduler = () => {
 			return;
 		}
 		console.log('EventData:', eventData);
+
 		// Verificar superposición para eventos nuevos o modificados
 		if (args.requestType === 'eventCreate' || args.requestType === 'eventChange') {
-			const { StartTime, EndTime } = args.data;
-        	if (esEventoSuperpuesto(new Date(StartTime), new Date(EndTime))) {
-                alert('El evento se superpone con una cita existente.');
-                args.cancel = true;
-                return;
-            }
+			const { StartTime, EndTime, Id } = args.data;
+			const inicio = new Date(StartTime);
+			const fin = new Date(EndTime);
+	
+			// Función para verificar si un evento se superpone con otros eventos
+			const esEventoSuperpuesto = (inicio, fin, idEvento = null) => {
+				console.log("Verificando superposición de evento...");
+				console.log("Inicio del evento a verificar:", inicio);
+				console.log("Fin del evento a verificar:", fin);
+				console.log("ID del evento a verificar:", idEvento);
+			
+				const superposicion = localData.some(evento => {
+					console.log("Revisando evento:", evento);
+			
+					if (idEvento !== evento.Id) { // Ignorar el evento actual si se está editando
+						const inicioEvento = new Date(evento.StartTime);
+						const finEvento = new Date(evento.EndTime);
+			
+						console.log("Inicio del evento existente:", inicioEvento);
+						console.log("Fin del evento existente:", finEvento);
+			
+						const seSuperpone = inicio < finEvento && fin > inicioEvento;
+						console.log("¿Se superpone con este evento?:", seSuperpone);
+			
+						return seSuperpone;
+					}
+			
+					return false;
+				});
+			
+				console.log("Resultado de la verificación de superposición:", superposicion);
+				return superposicion;
+			};
+	
+			// Verificar si el evento actual se superpone con otros
+			const eventoSuperpuesto = esEventoSuperpuesto(inicio, fin, Id);
+	
+			if (eventoSuperpuesto) {
+				// Verificar si alguno de los eventos superpuestos es de tipo "Cita"
+				const esCita = localData.some(evento => {
+					return (evento.EventType === 'Cita' && evento.Id !== Id && 
+							((inicio < new Date(evento.EndTime) && fin > new Date(evento.StartTime)) ||
+							 (inicio <= new Date(evento.StartTime) && fin >= new Date(evento.EndTime))));
+				});
+	
+				if (esCita) {
+					alert('No se pueden superponer eventos con citas.');
+					args.cancel = true;
+					return;
+				} else {
+					// Solicitar confirmación para superponer eventos que no son citas
+					if (!window.confirm('Hay una colisión con otro evento. ¿Deseas continuar?')) {
+						args.cancel = true;
+						return;
+					}
+				}
+			}
 		}
+	
 
 		const isUpdate = eventData._id != null;
 		const apiEndpoint = isUpdate ? '/update' : '/create';
