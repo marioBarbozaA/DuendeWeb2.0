@@ -209,7 +209,7 @@ const Scheduler = () => {
 					</tr>
 
 					<tr>
-						<td className='e-textlabel'>Imagen de Referencia</td>
+						<td className='e-textlabel'>Servicio</td>
 						<td>
 							<input
 								id='ReferenceService'
