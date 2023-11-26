@@ -58,6 +58,19 @@ const Scheduler = () => {
 			console.error('Error al obtener datos de la API:', error);
 		}
 	};
+
+	// Función para verificar si un evento se superpone con eventos de tipo "Cita"
+    const esEventoSuperpuesto = (inicio, fin) => {
+        return localData.some(evento => {
+            if (evento.EventType === 'Cita') {
+                const inicioCita = new Date(evento.StartTime);
+                const finCita = new Date(evento.EndTime);
+                return (inicio < finCita && fin > inicioCita);
+            }
+            return false;
+        });
+    };
+
 	useEffect(() => {
 		if (shouldFetchData) {
 			fetchData();
@@ -88,6 +101,7 @@ const Scheduler = () => {
 	};
 
 	const handleActionBegin = async args => {
+		
 		if (
 			!['eventCreate', 'eventChange', 'eventRemove'].includes(args.requestType)
 		) {
@@ -103,6 +117,15 @@ const Scheduler = () => {
 			return;
 		}
 		console.log('EventData:', eventData);
+		// Verificar superposición para eventos nuevos o modificados
+		if (args.requestType === 'eventCreate' || args.requestType === 'eventChange') {
+			const { StartTime, EndTime } = args.data;
+        	if (esEventoSuperpuesto(new Date(StartTime), new Date(EndTime))) {
+                alert('El evento se superpone con una cita existente.');
+                args.cancel = true;
+                return;
+            }
+		}
 
 		const isUpdate = eventData._id != null;
 		const apiEndpoint = isUpdate ? '/update' : '/create';
