@@ -247,7 +247,7 @@ const Scheduler = () => {
 					<tr>
 						<td className='e-textlabel'>Detalles</td>
 						<td>
-							<input
+							<textarea
 								id='Details'
 								name='Details'
 								type='text'
@@ -352,7 +352,7 @@ const Scheduler = () => {
 					<tr>
 						<td className='e-textlabel'>Detalles</td>
 						<td>
-							<input
+							<textarea
 								id='Details'
 								name='Details'
 								type='text'
@@ -432,7 +432,7 @@ const Scheduler = () => {
 					<tr>
 						<td className='e-textlabel'>Detalles</td>
 						<td>
-							<input
+							<textarea
 								id='Details'
 								name='Details'
 								type='text'
