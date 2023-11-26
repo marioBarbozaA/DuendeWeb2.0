@@ -12,6 +12,7 @@ const Sale = require("../models/Sales.js");
 
 const CitaDecorator = require('../models/CitaDecorator');
 const EntregaDecorator = require('../models/EntregaDecorator');
+const mongoose = require('mongoose');
 
 const { createAccessToken } = require("../libs/jwt.js");
 const { TOKEN_SECRET } = require("../config/config.js");
@@ -250,6 +251,19 @@ class Singleton {
             console.log("decoratedAppointment",decoratedAppointment);
         }
 
+        else { 
+          decoratedAppointment = new Appointment({
+                Subject: jsonAppointment.Subject,
+                EventType: jsonAppointment.EventType,
+                StartTime: jsonAppointment.StartTime,
+                EndTime: jsonAppointment.EndTime,
+                Details: jsonAppointment.Details,
+                status: jsonAppointment.status,
+            });
+            console.log("decoratedAppointment",decoratedAppointment);
+
+          }
+
         // Guardar el nuevo evento en la base de datos
         await decoratedAppointment.save();
 
@@ -261,65 +275,46 @@ class Singleton {
 }
 
 
-async updateAppointment(req, res, next) {
-  try {
-    const jsonAppointment = req.body;
-    const appointmentId = jsonAppointment._id;
+async updateAppointment(req, res, next) {  
+  try {  
+    const jsonAppointment = req.body;  
+    console.log("updateAppointment:", jsonAppointment); 
 
-    const appointmentFound = await Appointment.findOne({ _id: appointmentId });
+    const appointmentId = jsonAppointment._id;  
 
-    if (!appointmentFound) {
+    // Determinar el modelo decorador correcto en función del tipo de evento
+    let model;
+    if (jsonAppointment.EventType === 'Entrega') { 
+      model = mongoose.model('Entrega'); // Asumiendo que este es el nombre correcto
+    } else if (jsonAppointment.EventType === 'Cita') { 
+      model = mongoose.model('Cita'); // Utilizando el nombre correcto del esquema
+    } else if (jsonAppointment.EventType === 'Otro') { 
+      model = mongoose.model('Appointment'); 
+    }
+    else {
+      return res.status(400).json({ message: 'Tipo de evento no reconocido' });
+    }
+
+    // Buscar y actualizar el compromiso usando el modelo decorador correcto
+    const updateResult = await model.updateOne({ _id: appointmentId }, { $set: jsonAppointment });
+
+    console.log("Update Result:", updateResult); // Para depuración
+
+    // Verificar si se actualizó el documento
+    if (updateResult.matchedCount === 0) {
       return res.status(404).json({ message: 'El compromiso no se encuentra' });
     }
 
-    // Extract common fields
-    const commonFields = {
-      Subject: jsonAppointment.Subject,
-      EventType: jsonAppointment.EventType,
-      StartTime: jsonAppointment.StartTime,
-      EndTime: jsonAppointment.EndTime,
-      Details: jsonAppointment.Details,
-      status: jsonAppointment.status,
-    };
-    console.log("commonFields:",commonFields);
-
-    // Extract type-specific fields
-    let typeSpecificFields = {};
-    if (jsonAppointment.EventType === 'Entrega') {
-      typeSpecificFields = {
-        OrderNumber: jsonAppointment.OrderNumber,
-        DeliveryCustomerName: jsonAppointment.DeliveryCustomerName,
-        // Add other fields specific to Entrega if needed
-      };
-    } else if (jsonAppointment.EventType === 'Cita') {
-      typeSpecificFields = {
-        CustomerName: jsonAppointment.CustomerName,
-        ReferenceService: jsonAppointment.ReferenceService,
-        // Add other fields specific to Cita if needed
-      };
-    }
-
-    console.log("typeSpecificFields:",typeSpecificFields);  
-
-    // Merge common and type-specific fields
-    const updateFields = { ...commonFields, ...typeSpecificFields };
-
-    console.log("updateFields:",updateFields);
-
-    // Update the appointment in the database
-    await Appointment.updateOne({ _id: appointmentId }, { $set: updateFields });
-
-    res.status(200).json({
-      state: true,
-      message: 'El compromiso se ha modificado exitosamente',
-    });
-  } catch (error) {
-    console.error(`Error del servidor: ${error}`);
-    res.status(500).json({ message: `Error del servidor: ${error}` });
-  }
-  return next();
+    res.status(200).json({  
+      state: true,  
+      message: 'El compromiso se ha modificado exitosamente',  
+    });  
+  } catch (error) {  
+    console.error(`Error del servidor: ${error}`);  
+    res.status(500).json({ message: `Error del servidor: ${error}` });  
+  }  
+  return next();  
 }
-
 
 
 

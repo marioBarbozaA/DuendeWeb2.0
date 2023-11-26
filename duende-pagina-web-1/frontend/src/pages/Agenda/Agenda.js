@@ -67,11 +67,11 @@ const Scheduler = () => {
 
 	const fieldsData = {
 		id: 'Id',
-		subject: { name: 'Subject', validation: { required: true } },
-		type: { name: 'EventType', validation: { required: true } },
-		details: { name: 'Details', validation: { required: true } },
-		startTime: { name: 'StartTime', validation: { required: true } },
-		endTime: { name: 'EndTime', validation: { required: true } },
+		Subject: { name: 'Subject', validation: { required: true } },
+		EventType: { name: 'EventType', validation: { required: true } },
+		Details: { name: 'Details', validation: { required: true } },
+		StartTime: { name: 'StartTime', validation: { required: true } },
+		EendTime: { name: 'EndTime', validation: { required: true } },
 		CustomerName: { name: 'CustomerName' },
 		ReferenceService: { name: 'ReferenceService' },
 		OrderNumber: { name: 'OrderNumber' },
