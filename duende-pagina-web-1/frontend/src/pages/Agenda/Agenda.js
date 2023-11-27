@@ -59,7 +59,6 @@ const Scheduler = () => {
 		}
 	};
 
-
 	useEffect(() => {
 		if (shouldFetchData) {
 			fetchData();
@@ -90,7 +89,6 @@ const Scheduler = () => {
 	};
 
 	const handleActionBegin = async args => {
-		
 		if (
 			!['eventCreate', 'eventChange', 'eventRemove'].includes(args.requestType)
 		) {
@@ -108,66 +106,80 @@ const Scheduler = () => {
 		console.log('EventData:', eventData);
 
 		// Verificar superposición para eventos nuevos o modificados
-		if (args.requestType === 'eventCreate' || args.requestType === 'eventChange') {
-			const { StartTime, EndTime, Id } = args.data;
+		if (
+			args.requestType === 'eventCreate' ||
+			args.requestType === 'eventChange'
+		) {
+			const { StartTime, EndTime, Id } = eventData;
+
+			console.log(args.data);
+			console.log('StartTime', StartTime);
+			console.log('EndTime', EndTime);
+			console.log('Id', Id);
 			const inicio = new Date(StartTime);
 			const fin = new Date(EndTime);
-	
+
 			// Función para verificar si un evento se superpone con otros eventos
-			const esEventoSuperpuesto = (inicio, fin, idEvento = null) => {
-				console.log("Verificando superposición de evento...");
-				console.log("Inicio del evento a verificar:", inicio);
-				console.log("Fin del evento a verificar:", fin);
-				console.log("ID del evento a verificar:", idEvento);
-			
+			const esEventoSuperpuesto = (inicio, fin, idEvento = null, _id) => {
 				const superposicion = localData.some(evento => {
-					console.log("Revisando evento:", evento);
-			
-					if (idEvento !== evento.Id) { // Ignorar el evento actual si se está editando
+					if (idEvento !== evento.Id) {
+						if (evento._id === _id) {
+							return false;
+						}
+						// Ignorar el evento actual si se está editando
 						const inicioEvento = new Date(evento.StartTime);
 						const finEvento = new Date(evento.EndTime);
-			
-						console.log("Inicio del evento existente:", inicioEvento);
-						console.log("Fin del evento existente:", finEvento);
-			
+
 						const seSuperpone = inicio < finEvento && fin > inicioEvento;
-						console.log("¿Se superpone con este evento?:", seSuperpone);
-			
+
 						return seSuperpone;
 					}
-			
+
 					return false;
 				});
-			
-				console.log("Resultado de la verificación de superposición:", superposicion);
+
 				return superposicion;
 			};
-	
+
 			// Verificar si el evento actual se superpone con otros
-			const eventoSuperpuesto = esEventoSuperpuesto(inicio, fin, Id);
-	
+			const eventoSuperpuesto = esEventoSuperpuesto(
+				inicio,
+				fin,
+				Id,
+				eventData._id,
+			);
+
 			if (eventoSuperpuesto) {
+				const esCita = eventData.EventType === 'Cita';
+
 				// Verificar si alguno de los eventos superpuestos es de tipo "Cita"
-				const esCita = localData.some(evento => {
-					return (evento.EventType === 'Cita' && evento.Id !== Id && 
-							((inicio < new Date(evento.EndTime) && fin > new Date(evento.StartTime)) ||
-							 (inicio <= new Date(evento.StartTime) && fin >= new Date(evento.EndTime))));
+				const superposicionConCita = localData.some(evento => {
+					return (
+						evento.EventType === 'Cita' &&
+						((inicio < new Date(evento.EndTime) &&
+							fin > new Date(evento.StartTime)) ||
+							(inicio <= new Date(evento.StartTime) &&
+								fin >= new Date(evento.EndTime)))
+					);
 				});
-	
-				if (esCita) {
+
+				if (esCita || superposicionConCita) {
 					alert('No se pueden superponer eventos con citas.');
 					args.cancel = true;
 					return;
-				} else {
-					// Solicitar confirmación para superponer eventos que no son citas
-					if (!window.confirm('Hay una colisión con otro evento. ¿Deseas continuar?')) {
-						args.cancel = true;
-						return;
-					}
+				}
+
+				// Si no es una cita pero hay superposición con otros tipos de eventos, pedir confirmación
+				if (
+					!window.confirm(
+						'Hay una colisión con otro evento. ¿Deseas continuar?',
+					)
+				) {
+					args.cancel = true;
+					return;
 				}
 			}
 		}
-	
 
 		const isUpdate = eventData._id != null;
 		const apiEndpoint = isUpdate ? '/update' : '/create';
