@@ -4,7 +4,7 @@ import instagram from '../../../Imagenes/instagram.png';
 import './Login.css';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../Context/Authcontext.js';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 import axios from '../../../axios.js';
 
@@ -21,7 +21,7 @@ export const handleLogin = async (email, password) => {
 		});
 
 		console.log('Response:', response);
-		if(response !== undefined){
+		if (response !== undefined) {
 			if (response.data.status) {
 				// Login successful, handle the user's session or redirect
 				console.log('User logged in:', response.data.message);
@@ -103,8 +103,8 @@ function Login() {
 							/>
 						</div>
 						<div className='opciones-login'>
-							<a href='/Recovery'>Recuperar Contraseña</a>
-							<a href='/Register'>Registrarse</a>
+							<Link to='/Recovery'>Recuperar Contraseña</Link>
+							<Link to='/Register'>Registrarse</Link>
 						</div>
 						<button className='login-button' onClick={onSubmit}>
 							Iniciar Sesión
@@ -112,8 +112,13 @@ function Login() {
 					</form>
 				</div>
 				<div className='instagram-icon'>
-					{/* Aquí puedes colocar el icono de Instagram */}
-					<img src={instagram} alt='Icono de Instagram' />
+					<a
+						href='https://www.instagram.com/duenderfs'
+						target='_blank'
+						rel='noopener noreferrer'
+					>
+						<img src={instagram} alt='Icono de Instagram' />
+					</a>
 				</div>
 			</div>
 		</div>

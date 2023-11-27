@@ -19,23 +19,11 @@ import { DropDownListComponent } from '@syncfusion/ej2-react-dropdowns';
 import { DateTimePickerComponent } from '@syncfusion/ej2-react-calendars';
 
 import { registerLicense } from '@syncfusion/ej2-base';
-import { L10n } from '@syncfusion/ej2-base';
 import axios from 'axios';
 
 registerLicense(
 	'Ngo9BigBOggjHTQxAR8/V1NHaF5cWWdCf1FpRGRGfV5yd0VHYlZQRHxeSk0SNHVRdkdgWH5fd3RVR2FYVkx2Vko=',
 );
-
-L10n.load({
-	'en-US': {
-		schedule: {
-			saveButton: 'Guardar',
-			cancelButton: 'Cerrar',
-			deleteButton: 'Eliminar',
-			newEvent: 'Añadir Evento',
-		},
-	},
-});
 
 const Scheduler = () => {
 	const [eventTypes, setEventTypes] = useState({});
@@ -112,10 +100,6 @@ const Scheduler = () => {
 		) {
 			const { StartTime, EndTime, Id } = eventData;
 
-			console.log(args.data);
-			console.log('StartTime', StartTime);
-			console.log('EndTime', EndTime);
-			console.log('Id', Id);
 			const inicio = new Date(StartTime);
 			const fin = new Date(EndTime);
 
