@@ -81,7 +81,7 @@ const newSale = async (req, res) => {
     console.error('Error creating new sale:', error);
     res.status(500).json({ msg: 'Server error' + error });
   }
-};
+  };
 
 const userHistory = async (req, res) => {
   console.log('User history controller...');

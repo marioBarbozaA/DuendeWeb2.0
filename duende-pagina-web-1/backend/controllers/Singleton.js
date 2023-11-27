@@ -9,10 +9,12 @@ const Message = require("../models/Message.js");
 const ShoppingCart = require("../models/ShoppingCart.js");
 const Gallery = require("../models/GalleryImage.js");
 const Sale = require("../models/Sales.js");
+const NotificationModel = require("../models/Notification.js");
 
 const CitaDecorator = require('../models/CitaDecorator');
 const EntregaDecorator = require('../models/EntregaDecorator');
 const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 
 const { createAccessToken } = require("../libs/jwt.js");
 const { TOKEN_SECRET } = require("../config/config.js");
@@ -1188,24 +1190,27 @@ async getAllAppointments(req, res, next) {
   /////////////////////////////////////
   async createNotification(notificationDataArray) {
     try {
-      // Check if the input is an array; if not, wrap it in an array
-      const notificationsArray = Array.isArray(notificationDataArray)
-        ? notificationDataArray
-        : [notificationDataArray];
-      const notifications = await NotificationModel.insertMany(
-        notificationsArray
-      );
-      console.log("Notifications created:", notifications);
-      return notifications;
+        const notificationsArray = Array.isArray(notificationDataArray)
+            ? notificationDataArray
+            : [notificationDataArray];
+
+        // Manually cast the 'user' field to ObjectId
+        const modifiedNotificationsArray = notificationsArray.map(notification => ({
+            ...notification,
+            user: new ObjectId(notification.user)
+        }));
+
+        console.log("Modified Notifications Array:", modifiedNotificationsArray);
+
+        const notifications = await NotificationModel.insertMany(modifiedNotificationsArray);
+        console.log("Notifications created:", notifications);
+        return notifications;
     } catch (error) {
-      console.error(
-        "Error creating notifications:",
-        error.message,
-        error.errors
-      );
-      throw error;
+        console.error("Error creating notifications:", error.message, error.errors);
+        throw error;
     }
-  }
+}
+
 
   async getAllNotifications() {
     try {

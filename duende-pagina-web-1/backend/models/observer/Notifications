@@ -1,0 +1,23 @@
+User:
+
+    (Sales)
+    -Confirm order (Thank you for your purchase)
+    -Order Accepted
+    -Order Rejected
+
+    (Appointments)
+    -Confirm Service
+    -Accepted Service
+    -Rejected Service
+
+<!--
+    -Creative Notification -->
+
+Admin:
+
+    (Sales)
+    -Receive order
+
+    (Appointments)
+    -Entry in the agenda
+    -Service contact

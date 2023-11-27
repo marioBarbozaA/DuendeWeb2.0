@@ -14,25 +14,33 @@ class newSaleObserver extends Observer {
             console.error('userBuyer is undefined in the message object');
             return;
         }
-        const adminId = "6539c5111b8018f186929836"; // Admin user ID
-        const userBuyerId = message.userBuyer ? message.userBuyer.toString() : null;
+        const adminId = '6539c5111b8018f186929836'; // Admin user ID
+        const userBuyerId = message.userBuyer.toString();
         console.log('userBuyerId:', userBuyerId);
         console.log('adminId:', adminId);
         const notifications = [
 
             {
                 user: userBuyerId,
-                title: "Purchase Completed",
-                description: "Your sale was made successfully",
+                title: 'Purchase Completed',
+                description: 'Your sale was made successfully',
                 date: new Date(),
-                type: "Confirm Purchase",
-                state: "Active",
+                type: 'Confirm Purchase',
+                state: 'Active',
+            },
+            {
+                user: adminId,
+                title: 'New Sale',
+                description: 'A new sale was made',
+                date: new Date(),
+                type: 'New Sale',
+                state: 'Active',
             }
         ];
         notifications.forEach(notification => console.log('Notification to be created:', notification));
 
         try {
-            await SingletonDAO.createNotification(notifications);
+            const notificaciones = await SingletonDAO.createNotification(notifications);
             console.log('Both notifications created successfully');
         } catch (error) {
             console.error('Error creating notifications:', error);
