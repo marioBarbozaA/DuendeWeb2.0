@@ -85,12 +85,13 @@ function PopUpHistorialUser(props) {
 		setEstado(newEstado);
 	  
 		try {
+			const deliveryDateNotification = calculateDeliveryDate();
 		  const response = await fetch(`http://localhost:3500/sales/admin/ventas/${compra._id}`, {
 			method: 'PUT',
 			headers: {
 			  'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({ status: newEstado, userBuyer: compra.userBuyer }),
+			body: JSON.stringify({ status: newEstado, userBuyer: compra.userBuyer, deliverDate: deliveryDateNotification, orderNum: compra.orderNum }),
 		  });
 	  
 		  if (response.status === 200) {

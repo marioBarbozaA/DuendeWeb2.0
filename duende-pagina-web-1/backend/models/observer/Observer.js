@@ -54,17 +54,21 @@ class updateSaleObserver extends Observer {
             console.error('userBuyer or approvalStatus is undefined in the message object');
             return;
         }
-
+        
         const userBuyerId = message.userBuyer.toString();
         const approvalStatus = message.status;
+        const dateEntrega = message.dateEntrega;
+        const orderNumber = message.orderNumber;
 
         const notification = {
             user: userBuyerId,
-            title: approvalStatus === 'Aceptado' ? 'Venta Aprobada' : 'Venta Rechazada',
-            description: approvalStatus === 'Aceptado' ? 'Tu venta ha sido aprobada. ¡Gracias por tu compra!' : 'Lamentablemente, tu venta ha sido rechazada.',
+            title: approvalStatus === 'Aceptado' ? `Venta Aprobada #${orderNumber}` : 'Venta Rechazada',
+            description: approvalStatus === 'Aceptado' 
+                ? `Tu venta ha sido aprobada. Entrega día: ${dateEntrega}` 
+                : 'Lamentablemente, tu venta ha sido rechazada.',
             date: new Date(),
             type: approvalStatus === 'Aceptado' ? 'Venta Aprobada' : 'Venta Rechazada',
-            state: 'Active',
+            state: 'Active', 
         };
 
         console.log('Notification to be created:', notification);
@@ -80,10 +84,32 @@ class updateSaleObserver extends Observer {
 }
 
 class newAppointmentObserver extends Observer {
-    update(message) {
-        // Lógica específica para el observador de ventas
-        console.log(`SaleObserver update: ${message}`);
-        // Aquí puedes poner la lógica que necesites cuando se actualiza la venta
+    async update(message) {
+        if (!message.userBuyer || !message.status) {
+            console.error('userBuyer or approvalStatus is undefined in the message object');
+            return;
+        }
+
+        const userBuyerId = message.userBuyer.toString();
+        const approvalStatus = message.status;
+
+        const notification = {
+            user: userBuyerId,
+            title: 'Cita Agendada',
+            description: 'Tu cita ha sido agendada. ¡Gracias por tu compra!',
+            date: new Date(),
+            type: 'Entrega de producto',
+            state: 'Active',
+        };
+
+        console.log('Notification to be created:', notification);
+
+        try {
+            await SingletonDAO.createNotification([notification]);
+            console.log('Notification created successfully');
+        } catch (error) {
+            console.error('Error creating notification:', error);
+        }
     }
 }
 
