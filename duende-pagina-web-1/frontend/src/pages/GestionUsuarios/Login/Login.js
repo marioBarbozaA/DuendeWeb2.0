@@ -47,14 +47,22 @@ function Login() {
 	// Initialize state variables for email and password
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
-	const { signin, isAuthenticated } = useAuth();
+	const { signin, isAuthenticated, user } = useAuth();
 	const navigate = useNavigate();
 	useEffect(() => {
 		if (isAuthenticated) {
-			navigate('/MainPageUser');
+			console.log('Login: user:', user?.roles?.[0]);
+			switch (user?.roles?.[0]) {
+				case 'owner':
+					navigate('/MainPageAdmin');
+					break;
+				case 'client':
+				default:
+					navigate('/MainPageUser');
+					break;
+			}
 		}
-	}, [isAuthenticated]);
-
+	}, [isAuthenticated, user, navigate]);
 	//OnSubmit
 	const onSubmit = async event => {
 		event.preventDefault();
