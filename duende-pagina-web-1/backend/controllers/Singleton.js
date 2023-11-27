@@ -1224,17 +1224,20 @@ async getAllAppointments(req, res, next) {
 
   async getUserNotifications(req, res, next) {
     try {
-      console.log("getUserNotifications singleton:", req.params.userId);
-      const notifications = await NotificationModel.find({
-        user: req.params.userId,
-      });
-      console.log("Notificaciones del usuario:", notifications);
-      return notifications;
+        console.log("getUserNotifications singleton:", req.params.userId);
+
+        const notifications = await NotificationModel.find({
+            user: req.params.userId,
+        }).sort({ date: -1 }); // Sorting by date in descending order
+
+        console.log("Notificaciones del usuario:", notifications);
+        return notifications;
     } catch (error) {
-      console.error("Error al obtener las notificaciones del usuario:", error);
-      throw error;
+        console.error("Error al obtener las notificaciones del usuario:", error);
+        throw error;
     }
-  }
+}
+
 }
 
 let instance = null;
